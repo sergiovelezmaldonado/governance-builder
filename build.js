@@ -12,8 +12,12 @@ html = html.replace(
   '<script type="text/babel" data-presets="env,react">'
 );
 
+// Patch the served root file during Vercel's build step.
+fs.writeFileSync(sourcePath, html, 'utf8');
+
+// Also emit a dist copy in case the project later uses an output directory.
 fs.rmSync(outputDir, { recursive: true, force: true });
 fs.mkdirSync(outputDir, { recursive: true });
 fs.writeFileSync(outputPath, html, 'utf8');
 
-console.log('Built dist/index.html with Babel presets enabled.');
+console.log('Built index.html with Babel presets enabled.');
