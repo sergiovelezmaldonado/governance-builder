@@ -8,11 +8,11 @@ const outPath = path.join(outDir, 'index.html');
 let html = fs.readFileSync(sourcePath, 'utf8');
 
 html = html
-  .replace('<script type="text/babel" data-presets="env,react">', '<script type="text/babel" data-plugins="transform-react-jsx">')
-  .replace('<script type="text/babel">', '<script type="text/babel" data-plugins="transform-react-jsx">');
+  .replace('<script type="text/babel" data-presets="env,react">', '<script type="text/babel" data-presets="react">')
+  .replace('<script type="text/babel">', '<script type="text/babel" data-presets="react">');
 
 fs.rmSync(outDir, { recursive: true, force: true });
 fs.mkdirSync(outDir, { recursive: true });
 fs.writeFileSync(outPath, html, 'utf8');
 
-console.log('Built public/index.html with JSX-only Babel transform.');
+console.log('Built public/index.html with React-only Babel preset.');
