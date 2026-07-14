@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script>
       tailwind.config = {
         theme: { extend: { fontFamily: { sans: ["Inter", "Arial", "sans-serif"] } } }
@@ -20,12 +20,12 @@
     <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone@7.29.7/babel.min.js"></script>
-    <meta name="futuria-version" content="v1.3-2026-05-19" />
+    <meta name="futuria-version" content="v1.4-2026-07-14" />
   </head>
   <body>
     <div id="root"></div>
     <script type="text/babel" data-presets="react">
-      const { useState, useEffect, useMemo } = React;
+      const { useState, useEffect, useMemo, useRef } = React;
 
 
 // ─── Catálogos ───────────────────────────────────────────────────────────────
@@ -2269,21 +2269,6 @@ function buildDocument(docName, org, useCases) {
   }
 }
 
-// ─── Tests de lógica ──────────────────────────────────────────────────────────
-
-function runLogicTests() {
-  const tests = [
-    { name: "Caso público + baja automatización → Bajo", input: { data: "Pública", automation: "Baja", human: "Sí", area: "Investigación y Desarrollo" }, expected: "Bajo" },
-    { name: "Datos personales + revisión parcial → Alto", input: { data: "Personal", automation: "Media", human: "Parcial", area: "Servicio al Cliente / CX" }, expected: "Alto" },
-    { name: "Laboral + automatización alta + RRHH → Crítico", input: { data: "Personal / laboral", automation: "Alta", human: "Parcial", area: "Talento humano / RRHH" }, expected: "Crítico" },
-    { name: "Confidencial sin revisión humana → Crítico", input: { data: "Confidencial", automation: "Media", human: "No", area: "Dirección / Gerencia General" }, expected: "Crítico" },
-  ];
-  return tests.map((t) => {
-    const result = classifyRisk(t.input);
-    return { ...t, actual: result.level, passed: result.level === t.expected };
-  });
-}
-
 // ─── Utilidades ──────────────────────────────────────────────────────────────
 
 function escapeHtml(v) {
@@ -2431,6 +2416,7 @@ function AboutModal({ open, onClose }) {
         <div className="mb-4 rounded-2xl border border-[#e5e5e5] bg-[#fafafa] p-4 text-sm text-[#333333]">
           <strong>Privacidad:</strong> esta aplicación no recopila datos, no usa cookies de seguimiento y no envía información a servidores. Todo permanece en tu dispositivo.
         </div>
+        <p className="mb-4 text-sm text-[#333333]">¿Necesitas asesoría para implementar tu gobernanza de IA? Escríbenos a <a href="mailto:sergiovelezmaldonado.ca@gmail.com?subject=Asesor%C3%ADa%20en%20gobernanza%20de%20IA%20%E2%80%94%20FuturIA" className="font-semibold text-[#b00020] hover:underline">sergiovelezmaldonado.ca@gmail.com</a>.</p>
         <div className="grid gap-3 md:grid-cols-3">
           {["+70K comunidad", "+80 países", "+300K visitas/mes"].map((item) => (
             <div key={item} className="rounded-2xl border border-[#e5e5e5] bg-[#fff5f6] p-4 text-center font-semibold text-[#222222]">{item}</div>
@@ -2579,6 +2565,8 @@ const emptyOrg = {
   tools: [], policy: "No existe política formal",
 };
 
+const defaultRoles = { responsable: "", cargo: "", email: "", responsabilidades: "", comiteActivo: false, comiteMiembros: "", comiteFrecuencia: "Trimestral", champions: "" };
+
 // ─── App ──────────────────────────────────────────────────────────────────────
 
 function App() {
@@ -2589,18 +2577,20 @@ function App() {
   const [exportModal, setExportModal] = useState(null);
   const [confirmModal, setConfirmModal] = useState(null);
   const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const importInputRef = useRef(null);
   const [caseSearch, setCaseSearch] = useState("");
   const [savedAt, setSavedAt] = useState(null);
   const [simOrgType, setSimOrgType] = useState("Pyme");
   const [docViewer, setDocViewer] = useState(null); // { name, content }
 
   const [org, setOrg] = useState(stored?.org || defaultOrg);
-  const [useCases, setUseCases] = useState(stored?.useCases || sampleUseCases);
+  const [useCases, setUseCases] = useState(stored?.useCases || []);
   const [newCase, setNewCase] = useState({ name: "", area: areaOptions[0], data: "Pública", automation: "Baja", human: "Sí" });
   const [editingCaseId, setEditingCaseId] = useState(null);
 
   const [gpts, setGpts] = useState(stored?.gpts || []);
-  const [roles, setRoles] = useState(stored?.roles || { responsable: "", cargo: "", email: "", responsabilidades: "", comiteActivo: false, comiteMiembros: "", comiteFrecuencia: "Trimestral", champions: "" });
+  const [roles, setRoles] = useState(stored?.roles || defaultRoles);
   const [incidents, setIncidents] = useState(stored?.incidents || []);
   const [dataPolicy, setDataPolicy] = useState(stored?.dataPolicy || { notas: "" });
   const [newGpt, setNewGpt] = useState({ name: "", platform: "ChatGPT", purpose: "", area: areaOptions[0], access: "Solo creador", dataLevel: "Público", riskLevel: "Bajo" });
@@ -2614,7 +2604,6 @@ function App() {
   }, [org, useCases, gpts, roles, incidents, dataPolicy]);
 
   const score = useMemo(() => calculateReadinessScore(org, useCases), [org, useCases]);
-  const tests = useMemo(() => runLogicTests(), []);
   const generatedPolicy = useMemo(() => buildPolicy(org), [org]);
   const filteredLibrary = useMemo(() => {
     const q = gptLibrarySearch.toLowerCase().trim();
@@ -2631,6 +2620,7 @@ function App() {
   const highRiskCount = useCases.filter((c) => ["Alto", "Crítico"].includes(c.level)).length;
 
   function showSuccess(msg) { setSuccessMsg(msg); setTimeout(() => setSuccessMsg(""), 3500); }
+  function showError(msg) { setErrorMsg(msg); setTimeout(() => setErrorMsg(""), 4500); }
 
   function addCase() {
     if (!newCase.name.trim()) return;
@@ -2710,6 +2700,46 @@ function App() {
     });
   }
 
+  function exportData() {
+    const data = { app: "futuria-governance-builder", exportedAt: new Date().toISOString(), org, useCases, gpts, roles, incidents, dataPolicy };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const slug = (org.name || "mi-organizacion").toLowerCase().replace(/\s+/g, "-");
+    a.href = url; a.download = `gobernanza-ia-${slug}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    showSuccess("Respaldo JSON descargado.");
+  }
+
+  function importData(e) {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      let d;
+      try { d = JSON.parse(reader.result); } catch { showError("El archivo no es un JSON válido."); return; }
+      if (!d || typeof d !== "object" || !d.org || typeof d.org !== "object") { showError("El archivo no es un respaldo del Governance Builder."); return; }
+      setConfirmModal({
+        title: "¿Importar respaldo?",
+        message: "Esto reemplazará todos los datos actuales con los del archivo importado.",
+        onConfirm: () => {
+          setOrg({ ...emptyOrg, ...d.org });
+          setUseCases(Array.isArray(d.useCases) ? d.useCases : []);
+          setGpts(Array.isArray(d.gpts) ? d.gpts : []);
+          setRoles(d.roles && typeof d.roles === "object" ? { ...defaultRoles, ...d.roles } : defaultRoles);
+          setIncidents(Array.isArray(d.incidents) ? d.incidents : []);
+          setDataPolicy(d.dataPolicy && typeof d.dataPolicy === "object" ? d.dataPolicy : { notas: "" });
+          setConfirmModal(null);
+          showSuccess("Respaldo importado correctamente.");
+        },
+      });
+    };
+    reader.onerror = () => showError("No se pudo leer el archivo.");
+    reader.readAsText(file);
+  }
+
   function downloadCurrentPolicy() {
     const content = generatedPolicy;
     const name = (org.name || "mi-organizacion").toLowerCase().replace(/\s+/g, "-");
@@ -2786,8 +2816,6 @@ function App() {
     { id: "politica", label: "5. Política" },
   ];
 
-  const allTestsPassed = tests.every((t) => t.passed);
-
   return (
     <div className="min-h-screen bg-white font-sans text-[#222222]">
       <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
@@ -2800,6 +2828,11 @@ function App() {
       {successMsg && (
         <div role="status" aria-live="polite" className="fixed bottom-4 right-4 z-50 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-3 text-sm font-semibold text-emerald-700 shadow-lg">
           ✓ {successMsg}
+        </div>
+      )}
+      {errorMsg && (
+        <div role="alert" aria-live="assertive" className="fixed bottom-4 right-4 z-50 rounded-2xl border border-red-200 bg-red-50 px-5 py-3 text-sm font-semibold text-red-700 shadow-lg">
+          ✕ {errorMsg}
         </div>
       )}
 
@@ -2846,9 +2879,10 @@ function App() {
           <div className="mt-5 rounded-[24px] border border-amber-100 bg-amber-50 p-4 text-xs leading-relaxed text-amber-800">
             <strong>Nota:</strong> esta app estructura gobernanza de IA. No reemplaza asesoría legal, privacidad, compliance ni ciberseguridad.
           </div>
-          <div className="mt-3 flex items-center gap-2 rounded-2xl border border-[#e5e5e5] bg-white px-3 py-2">
-            <span className={allTestsPassed ? "text-emerald-600" : "text-red-500"}>●</span>
-            <span className="text-xs text-[#757575]">Lógica: {allTestsPassed ? "todas las pruebas OK" : "revisar pruebas"}</span>
+          <div className="mt-3 rounded-[24px] border border-[#e5e5e5] bg-white p-4 text-xs leading-relaxed text-[#555555]">
+            <p className="font-bold text-[#222222]">¿Necesitas asesoría?</p>
+            <p className="mt-1">El equipo de FuturIA puede acompañarte en la implementación de tu gobernanza de IA.</p>
+            <a href="mailto:sergiovelezmaldonado.ca@gmail.com?subject=Asesor%C3%ADa%20en%20gobernanza%20de%20IA%20%E2%80%94%20FuturIA" className="mt-2 inline-block font-semibold text-[#b00020] hover:underline">Escríbenos →</a>
           </div>
         </aside>
 
@@ -2880,6 +2914,11 @@ function App() {
                 <button onClick={() => setActive("diagnostico")} className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-[#b00020] px-6 py-3 text-sm font-semibold text-white shadow transition hover:bg-[#8a0018]">
                   Comenzar ahora →
                 </button>
+                <div className="mt-3">
+                  <button onClick={() => { loadSample(); setActive("dashboard"); }} className="text-sm font-semibold text-[#b00020] hover:underline">
+                    o carga un ejemplo completo para explorar la herramienta
+                  </button>
+                </div>
               </div>
 
               {/* Pasos */}
@@ -3019,8 +3058,11 @@ function App() {
               />
 
               <div className="mb-5 flex flex-wrap gap-2">
-                <AppButton variant="secondary" onClick={loadSample}>⊕ Datos simulados</AppButton>
+                <AppButton variant="secondary" onClick={loadSample}>⊕ Cargar ejemplo</AppButton>
                 <AppButton variant="secondary" onClick={clearData}>⊘ Limpiar datos</AppButton>
+                <AppButton variant="secondary" onClick={exportData}>↓ Exportar respaldo</AppButton>
+                <AppButton variant="secondary" onClick={() => importInputRef.current && importInputRef.current.click()}>↑ Importar respaldo</AppButton>
+                <input ref={importInputRef} type="file" accept="application/json,.json" onChange={importData} className="hidden" aria-hidden="true" />
                 <AppButton onClick={() => setActive("diagnostico")} className="ml-auto">Comenzar diagnóstico →</AppButton>
               </div>
 

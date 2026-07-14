@@ -1,1 +1,11 @@
-{"scripts":{"build":"node build.js"},"dependencies":{},"devDependencies":{}}
+{
+  "name": "governance-builder",
+  "private": true,
+  "scripts": {
+    "build": "node build.js"
+  },
+  "devDependencies": {
+    "@babel/core": "7.26.10",
+    "@babel/preset-react": "7.26.3"
+  }
+}
