@@ -33,8 +33,33 @@ const sandbox = {
   encodeURIComponent, decodeURIComponent, navigator: {},
 };
 vm.createContext(sandbox);
-vm.runInContext(code + '\n;globalThis.__App = App;', sandbox);
+vm.runInContext(code + '\n;globalThis.__App = App; globalThis.__cmp = { DonutScore, RiskMatrix, DocCategoryBars, ActivityFeed, matrixZone };', sandbox);
 const out = ReactDOMServer.renderToString(React.createElement(sandbox.__App));
+
+// Componentes del dashboard con datos de muestra
+const { DonutScore, RiskMatrix, DocCategoryBars, ActivityFeed, matrixZone } = sandbox.__cmp;
+const sampleCases = [
+  { id: 1, name: 'Caso A', prob: 'Alta', impact: 'Crítico', level: 'Crítico', automation: 'Alta' },
+  { id: 2, name: 'Caso legado', level: 'Medio', automation: 'Media' }, // sin prob/impact: usa inferencia
+];
+const dash = ReactDOMServer.renderToString(React.createElement('div', null,
+  React.createElement(DonutScore, { score: 62, label: 'En construcción' }),
+  React.createElement(RiskMatrix, { cases: sampleCases }),
+  React.createElement(DocCategoryBars, { docStats: { 'Política completa de uso responsable de IA': 3, 'Anexo legal y de compliance': 1 } }),
+  React.createElement(ActivityFeed, { activity: [{ ts: 1752500000000, text: 'Caso de uso registrado: "Caso A"' }] })
+));
+let failedDash = 0;
+const dashChecks = [
+  ['donut 62', dash.includes('>62<')],
+  ['matriz zonas', dash.includes('Probabilidad') && dash.includes('Impacto')],
+  ['docs barras', dash.includes('Políticas') && dash.includes('Anexos y mapeo')],
+  ['actividad', dash.includes('Caso de uso registrado')],
+  ['zona crítica correcta', matrixZone(2, 3).label === 'Crítico' && matrixZone(0, 0).label === 'Bajo'],
+];
+for (const [name, ok] of dashChecks) {
+  console.log((ok ? 'OK   ' : 'FALTA') + ' — dashboard: ' + name);
+  if (!ok) failedDash++;
+}
 
 const checks = [
   'Governance Builder',
@@ -52,4 +77,4 @@ for (const c of checks) {
   if (!ok) failed++;
 }
 console.log('HTML renderizado: ' + Math.round(out.length / 1024) + ' KB');
-process.exit(failed ? 1 : 0);
+process.exit(failed + failedDash ? 1 : 0);
