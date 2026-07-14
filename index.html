@@ -20,7 +20,7 @@
     <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone@7.29.7/babel.min.js"></script>
-    <meta name="futuria-version" content="v1.5-2026-07-14" />
+    <meta name="futuria-version" content="v1.6-2026-07-14" />
   </head>
   <body>
     <div id="root"></div>
@@ -2615,6 +2615,155 @@ function Kpi({ title, value, note, icon }) {
   );
 }
 
+// ─── Componentes del dashboard visual ────────────────────────────────────────
+
+function MiniKpi({ title, value, note }) {
+  return (
+    <Card>
+      <div className="p-4">
+        <p className="text-xs font-semibold uppercase tracking-wide text-[#757575]">{title}</p>
+        <p className="mt-1 text-2xl font-bold text-[#222222]">{value}</p>
+        <p className="mt-0.5 text-xs text-[#757575]">{note}</p>
+      </div>
+    </Card>
+  );
+}
+
+function DonutScore({ score, label }) {
+  const r = 52;
+  const c = 2 * Math.PI * r;
+  const pct = Math.max(0, Math.min(100, score));
+  return (
+    <div className="flex flex-col items-center">
+      <svg width="150" height="150" viewBox="0 0 150 150" role="img" aria-label={`Nivel de preparación: ${pct} de 100 (${label})`}>
+        <circle cx="75" cy="75" r={r} fill="none" stroke="#f0f0f0" strokeWidth="12" />
+        {pct > 0 && (
+          <circle cx="75" cy="75" r={r} fill="none" stroke="#b00020" strokeWidth="12" strokeLinecap="round"
+            strokeDasharray={`${(pct / 100) * c} ${c}`} transform="rotate(-90 75 75)" />
+        )}
+        <text x="75" y="74" textAnchor="middle" fill="#222222" fontFamily="Inter, Arial, sans-serif" fontWeight="800" fontSize="30">{pct}</text>
+        <text x="75" y="94" textAnchor="middle" fill="#757575" fontFamily="Inter, Arial, sans-serif" fontWeight="600" fontSize="12">/100</text>
+      </svg>
+      <p className="mt-1 text-sm font-bold text-[#222222]">{label}</p>
+    </div>
+  );
+}
+
+const MATRIX_PROBS = ["Alta", "Media", "Baja"];
+const MATRIX_IMPACTS = ["Bajo", "Medio", "Alto", "Crítico"];
+
+function matrixZone(probIdx, impactIdx) {
+  const p = (probIdx + 1) * (impactIdx + 1); // prob 1-3 × impacto 1-4
+  if (p <= 2) return { label: "Bajo", cell: "bg-emerald-100 text-emerald-900" };
+  if (p <= 4) return { label: "Moderado", cell: "bg-amber-100 text-amber-900" };
+  if (p <= 6) return { label: "Alto", cell: "bg-orange-200 text-orange-900" };
+  return { label: "Crítico", cell: "bg-red-200 text-red-900" };
+}
+
+// Casos anteriores a v1.6 no tienen prob/impact: se infieren de la automatización y del nivel clasificado
+function caseProb(c) { return c.prob || c.automation || "Media"; }
+function caseImpact(c) { return c.impact || (c.level === "Medio" ? "Medio" : c.level) || "Medio"; }
+
+function RiskMatrix({ cases }) {
+  const cells = MATRIX_PROBS.map((prob) => MATRIX_IMPACTS.map((impact) => {
+    const items = cases.filter((c) => caseProb(c) === prob && caseImpact(c) === impact);
+    return { prob, impact, items };
+  }));
+  return (
+    <div>
+      <div className="flex gap-1.5">
+        <div className="flex items-center">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[#757575]" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>Probabilidad →</span>
+        </div>
+        <div className="flex-1">
+          {cells.map((row, ri) => (
+            <div key={MATRIX_PROBS[ri]} className="mb-1.5 flex gap-1.5">
+              <div className="flex w-12 shrink-0 items-center justify-end pr-1 text-[11px] font-semibold text-[#757575]">{MATRIX_PROBS[ri]}</div>
+              {row.map((cell, ci) => {
+                const zone = matrixZone(2 - ri, ci);
+                const names = cell.items.map((c) => c.name).join(" · ");
+                return (
+                  <div key={cell.impact}
+                    title={cell.items.length ? `${cell.items.length} caso(s) — zona ${zone.label}: ${names}` : `Sin casos — zona ${zone.label}`}
+                    className={cn("flex h-11 flex-1 items-center justify-center rounded-xl text-sm font-bold", zone.cell, cell.items.length === 0 && "opacity-45")}>
+                    {cell.items.length || "·"}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+          <div className="flex gap-1.5">
+            <div className="w-12 shrink-0" />
+            {MATRIX_IMPACTS.map((i) => <div key={i} className="flex-1 text-center text-[11px] font-semibold text-[#757575]">{i}</div>)}
+          </div>
+          <p className="mt-1 text-center text-[10px] font-bold uppercase tracking-widest text-[#757575]">Impacto →</p>
+        </div>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-[#555555]">
+        {[["Bajo", "bg-emerald-100"], ["Moderado", "bg-amber-100"], ["Alto", "bg-orange-200"], ["Crítico", "bg-red-200"]].map(([l, cl]) => (
+          <span key={l} className="flex items-center gap-1"><span className={cn("h-3 w-3 rounded", cl)} /> {l}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const DOC_CATEGORIES = [
+  { key: "Políticas", match: (n) => n.startsWith("Política") || n.startsWith("Declaración") || n.startsWith("Código") || n.startsWith("Manual") },
+  { key: "Registros", match: (n) => n.startsWith("Registro") },
+  { key: "Formularios", match: (n) => n.startsWith("Formulario") },
+  { key: "Guías y protocolos", match: (n) => n.startsWith("Guía") || n.startsWith("Protocolo") || n.startsWith("Checklist") },
+  { key: "Anexos y mapeo", match: (n) => n.startsWith("Anexo") || n.startsWith("Mapeo") },
+  { key: "Planes e informes", match: (n) => n.startsWith("Roadmap") || n.startsWith("Plan") || n.startsWith("Informe") || n.startsWith("Matriz") },
+];
+
+function DocCategoryBars({ docStats }) {
+  const counts = DOC_CATEGORIES.map((cat) => ({
+    key: cat.key,
+    count: Object.keys(docStats).filter((n) => cat.match(n)).reduce((s, n) => s + docStats[n], 0),
+  }));
+  const total = counts.reduce((s, c) => s + c.count, 0);
+  const max = Math.max(1, ...counts.map((c) => c.count));
+  if (total === 0) {
+    return <p className="rounded-2xl border border-[#e5e5e5] p-5 text-center text-sm text-[#757575]">Genera tu primer documento en «Documentos y anexos» para ver la distribución aquí.</p>;
+  }
+  return (
+    <div>
+      <div className="space-y-2.5">
+        {counts.map((c) => (
+          <div key={c.key} title={`${c.key}: ${c.count} generado(s)`}>
+            <div className="mb-1 flex items-center justify-between text-xs">
+              <span className="font-semibold text-[#333333]">{c.key}</span>
+              <span className="font-bold text-[#222222]">{c.count}</span>
+            </div>
+            <div className="h-2 rounded-full bg-[#f0f0f0]">
+              <div className="h-2 rounded-full bg-[#b00020] transition-all duration-500" style={{ width: `${(c.count / max) * 100}%` }} />
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-xs text-[#757575]">Total generados: <strong className="text-[#222222]">{total}</strong> · {docTypes.length} tipos disponibles</p>
+    </div>
+  );
+}
+
+function ActivityFeed({ activity }) {
+  if (!activity.length) {
+    return <p className="rounded-2xl border border-[#e5e5e5] p-5 text-center text-sm text-[#757575]">Aún no hay actividad registrada. Los eventos aparecerán aquí a medida que trabajes.</p>;
+  }
+  return (
+    <div className="space-y-2">
+      {activity.slice(0, 8).map((a, i) => (
+        <div key={a.ts + "-" + i} className="flex items-start gap-3 rounded-2xl border border-[#e5e5e5] bg-white px-4 py-2.5">
+          <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#b00020]" />
+          <p className="flex-1 text-sm text-[#333333]">{a.text}</p>
+          <span className="shrink-0 text-xs text-[#aaaaaa]">{new Date(a.ts).toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function UseCaseTable({ useCases, searchQuery, onSearchChange, onEdit, onDelete, editingId }) {
   const filtered = useCases.filter((c) =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -2736,13 +2885,15 @@ function App() {
 
   const [org, setOrg] = useState(stored?.org || defaultOrg);
   const [useCases, setUseCases] = useState(stored?.useCases || []);
-  const [newCase, setNewCase] = useState({ name: "", area: areaOptions[0], data: "Pública", automation: "Baja", human: "Sí" });
+  const [newCase, setNewCase] = useState({ name: "", area: areaOptions[0], data: "Pública", automation: "Baja", human: "Sí", prob: "Media", impact: "Medio" });
   const [editingCaseId, setEditingCaseId] = useState(null);
 
   const [gpts, setGpts] = useState(stored?.gpts || []);
   const [roles, setRoles] = useState(stored?.roles || defaultRoles);
   const [incidents, setIncidents] = useState(stored?.incidents || []);
   const [dataPolicy, setDataPolicy] = useState(stored?.dataPolicy || { notas: "" });
+  const [activity, setActivity] = useState(Array.isArray(stored?.activity) ? stored.activity : []);
+  const [docStats, setDocStats] = useState(stored?.docStats && typeof stored.docStats === "object" ? stored.docStats : {});
   const [newGpt, setNewGpt] = useState({ name: "", platform: "ChatGPT", purpose: "", area: areaOptions[0], access: "Solo creador", dataLevel: "Público", riskLevel: "Bajo" });
   const [showGptLibrary, setShowGptLibrary] = useState(false);
   const [gptLibrarySearch, setGptLibrarySearch] = useState("");
@@ -2752,7 +2903,7 @@ function App() {
     const all = readAllStore();
     all.active = activeProfile;
     if (!all.profiles) all.profiles = {};
-    all.profiles[activeProfile] = { org, useCases, gpts, roles, incidents, dataPolicy };
+    all.profiles[activeProfile] = { org, useCases, gpts, roles, incidents, dataPolicy, activity, docStats };
     writeAllStore(all);
     setProfiles((prev) => {
       const idx = prev.findIndex((p) => p.id === activeProfile);
@@ -2764,7 +2915,7 @@ function App() {
       return next;
     });
     setSavedAt(new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }));
-  }, [org, useCases, gpts, roles, incidents, dataPolicy, activeProfile]);
+  }, [org, useCases, gpts, roles, incidents, dataPolicy, activity, docStats, activeProfile]);
 
   const score = useMemo(() => calculateReadinessScore(org, useCases), [org, useCases]);
   const generatedPolicy = useMemo(() => buildPolicy(org), [org]);
@@ -2789,14 +2940,15 @@ function App() {
     if (!newCase.name.trim()) return;
     const risk = classifyRisk(newCase);
     setUseCases((prev) => [...prev, { id: Date.now(), ...newCase, ...risk }]);
-    setNewCase({ name: "", area: areaOptions[0], data: "Pública", automation: "Baja", human: "Sí" });
+    logActivity(`Caso de uso registrado: "${newCase.name.trim()}" (riesgo ${risk.level})`);
+    setNewCase({ name: "", area: areaOptions[0], data: "Pública", automation: "Baja", human: "Sí", prob: "Media", impact: "Medio" });
     showSuccess("Caso de uso registrado y clasificado correctamente.");
   }
 
   function startEditCase(id) {
     const c = useCases.find((c) => c.id === id);
     if (!c) return;
-    setNewCase({ name: c.name, area: c.area, data: c.data, automation: c.automation, human: c.human });
+    setNewCase({ name: c.name, area: c.area, data: c.data, automation: c.automation, human: c.human, prob: c.prob || "Media", impact: c.impact || "Medio" });
     setEditingCaseId(id);
   }
 
@@ -2804,13 +2956,14 @@ function App() {
     if (!newCase.name.trim()) return;
     const risk = classifyRisk(newCase);
     setUseCases((prev) => prev.map((c) => c.id === editingCaseId ? { ...c, ...newCase, ...risk } : c));
-    setNewCase({ name: "", area: areaOptions[0], data: "Pública", automation: "Baja", human: "Sí" });
+    logActivity(`Caso de uso actualizado: "${newCase.name.trim()}" (riesgo ${risk.level})`);
+    setNewCase({ name: "", area: areaOptions[0], data: "Pública", automation: "Baja", human: "Sí", prob: "Media", impact: "Medio" });
     setEditingCaseId(null);
     showSuccess("Caso de uso actualizado correctamente.");
   }
 
   function cancelEditCase() {
-    setNewCase({ name: "", area: areaOptions[0], data: "Pública", automation: "Baja", human: "Sí" });
+    setNewCase({ name: "", area: areaOptions[0], data: "Pública", automation: "Baja", human: "Sí", prob: "Media", impact: "Medio" });
     setEditingCaseId(null);
   }
 
@@ -2818,7 +2971,7 @@ function App() {
     setConfirmModal({
       title: "¿Eliminar este caso de uso?",
       message: "Se eliminará permanentemente. Esta acción no se puede deshacer.",
-      onConfirm: () => { setUseCases((prev) => prev.filter((c) => c.id !== id)); setConfirmModal(null); showSuccess("Caso de uso eliminado."); },
+      onConfirm: () => { setUseCases((prev) => prev.filter((c) => c.id !== id)); logActivity("Caso de uso eliminado."); setConfirmModal(null); showSuccess("Caso de uso eliminado."); },
     });
   }
 
@@ -2826,13 +2979,14 @@ function App() {
     setConfirmModal({
       title: "¿Eliminar todos los casos de uso?",
       message: "Se borrarán todos los casos registrados, incluidos los de ejemplo. Esta acción no se puede deshacer.",
-      onConfirm: () => { setUseCases([]); setEditingCaseId(null); setNewCase({ name: "", area: areaOptions[0], data: "Pública", automation: "Baja", human: "Sí" }); setConfirmModal(null); showSuccess("Todos los casos eliminados."); },
+      onConfirm: () => { setUseCases([]); setEditingCaseId(null); setNewCase({ name: "", area: areaOptions[0], data: "Pública", automation: "Baja", human: "Sí", prob: "Media", impact: "Medio" }); setConfirmModal(null); showSuccess("Todos los casos eliminados."); },
     });
   }
 
   function addGpt() {
     if (!newGpt.name.trim()) return;
     setGpts((prev) => [...prev, { id: Date.now(), ...newGpt }]);
+    logActivity(`GPT interno registrado: "${newGpt.name.trim()}"`);
     setNewGpt({ name: "", platform: "ChatGPT", purpose: "", area: areaOptions[0], access: "Solo creador", dataLevel: "Público", riskLevel: "Bajo" });
     showSuccess("GPT interno registrado correctamente.");
   }
@@ -2840,6 +2994,7 @@ function App() {
   function addIncident() {
     if (!newIncident.desc.trim()) return;
     setIncidents((prev) => [...prev, { id: Date.now(), ...newIncident }]);
+    logActivity(`Incidente registrado (${newIncident.severity})`);
     setNewIncident({ desc: "", tool: "", data: "No aplica", severity: "Menor", status: "Detectado", date: new Date().toLocaleDateString("es-ES") });
     showSuccess("Incidente registrado correctamente.");
   }
@@ -2851,6 +3006,16 @@ function App() {
     setRoles(d.roles && typeof d.roles === "object" ? { ...defaultRoles, ...d.roles } : defaultRoles);
     setIncidents(Array.isArray(d.incidents) ? d.incidents : []);
     setDataPolicy(d.dataPolicy && typeof d.dataPolicy === "object" ? d.dataPolicy : { notas: "" });
+    setActivity(Array.isArray(d.activity) ? d.activity : []);
+    setDocStats(d.docStats && typeof d.docStats === "object" ? d.docStats : {});
+  }
+
+  function logActivity(text) {
+    setActivity((prev) => [{ ts: Date.now(), text }, ...prev].slice(0, 20));
+  }
+
+  function registerDoc(docName) {
+    setDocStats((prev) => ({ ...prev, [docName]: (prev[docName] || 0) + 1 }));
   }
 
   function switchProfile(id) {
@@ -2910,7 +3075,7 @@ function App() {
   }
 
   function exportData() {
-    const data = { app: "futuria-governance-builder", exportedAt: new Date().toISOString(), org, useCases, gpts, roles, incidents, dataPolicy };
+    const data = { app: "futuria-governance-builder", exportedAt: new Date().toISOString(), org, useCases, gpts, roles, incidents, dataPolicy, activity, docStats };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -2935,6 +3100,7 @@ function App() {
         message: "Esto reemplazará todos los datos actuales con los del archivo importado.",
         onConfirm: () => {
           applyProfileData(d);
+          logActivity("Respaldo JSON importado.");
           setConfirmModal(null);
           showSuccess("Respaldo importado correctamente.");
         },
@@ -2948,6 +3114,8 @@ function App() {
     const content = generatedPolicy;
     const name = (org.name || "mi-organizacion").toLowerCase().replace(/\s+/g, "-");
     await downloadAsWord(content, `politica-ia-${name}`);
+    registerDoc("Política completa de uso responsable de IA");
+    logActivity("Política personalizada descargada en Word.");
     showSuccess("Documento descargado.");
   }
 
@@ -2969,6 +3137,8 @@ function App() {
 
   function openDocViewer(docName) {
     const content = buildDocument(docName, org, useCases);
+    registerDoc(docName);
+    logActivity(`Documento generado: ${docName}`);
     setDocViewer({ name: docName, content });
   }
 
@@ -3019,6 +3189,22 @@ function App() {
     { id: "riesgos", label: "4. Riesgos" },
     { id: "politica", label: "5. Política" },
   ];
+
+  // Índice de cumplimiento — compartido entre el dashboard y el panel de cumplimiento
+  const complianceChecks = [
+    { label: "Diagnóstico de organización completado", done: !!org.name, action: () => setActive("diagnostico"), weight: 15 },
+    { label: "Inventario de herramientas activo", done: org.tools.length > 0, action: () => setActive("inventario"), weight: 10 },
+    { label: "Mínimo 1 caso de uso registrado", done: useCases.length > 0, action: () => setActive("casos"), weight: 15 },
+    { label: "Responsable de IA nombrado", done: !!roles.responsable, action: () => setActive("roles"), weight: 25 },
+    { label: "Flujos de aprobación definidos", done: !!(roles["aprobacion_Bajo"] && roles["aprobacion_Medio"]), action: () => setActive("aprobaciones"), weight: 15 },
+    { label: "Política de datos documentada", done: Object.keys(dataPolicy).filter((k) => k.endsWith("_notas")).some((k) => !!dataPolicy[k]) || !!dataPolicy.notas, action: () => setActive("datosPolitica"), weight: 10 },
+    { label: "GPTs internos registrados", done: gpts.length > 0 || !org.tools.includes("GPT interno"), action: () => setActive("gpts"), weight: 5 },
+    { label: "Al menos 1 incidente analizado", done: incidents.length > 0, action: () => setActive("incidentes"), weight: 5 },
+  ];
+  const complianceTotal = complianceChecks.reduce((s, c) => s + c.weight, 0);
+  const complianceScore = Math.round((complianceChecks.filter((c) => c.done).reduce((s, c) => s + c.weight, 0) / complianceTotal) * 100);
+  const complianceLabel = complianceScore >= 80 ? "Sólida" : complianceScore >= 60 ? "En construcción" : complianceScore >= 40 ? "Básica" : "Inicial";
+  const openIncidentsCount = incidents.filter((i) => !["Remediado", "Cerrado"].includes(i.status)).length;
 
   return (
     <div className="min-h-screen bg-white font-sans text-[#222222]">
@@ -3281,12 +3467,49 @@ function App() {
                 <AppButton onClick={() => setActive("diagnostico")} className="ml-auto">Comenzar diagnóstico →</AppButton>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <Kpi title="Preparación" value={`${score}/100`} note={readinessLabel} icon="◷" />
-                <Kpi title="Casos registrados" value={useCases.length} note={`${highRiskCount} en riesgo alto o crítico`} icon="◆" />
-                <Kpi title="Herramientas" value={org.tools.length} note="registradas en inventario" icon="◈" />
-                <Kpi title="Documentos" value={docTypes.length} note="tipos disponibles" icon="¶" />
+              {/* Fila visual ejecutiva */}
+              <div className="grid gap-4 xl:grid-cols-3">
+                <Card>
+                  <div className="p-5">
+                    <h2 className="mb-2 font-bold text-[#222222]">Nivel de preparación</h2>
+                    <DonutScore score={score} label={readinessLabel} />
+                    <p className="mt-2 text-center text-xs text-[#757575]">Calculado con el diagnóstico y los casos de uso registrados.</p>
+                  </div>
+                </Card>
+                <Card>
+                  <div className="p-5">
+                    <h2 className="mb-3 font-bold text-[#222222]">Matriz de riesgos</h2>
+                    <RiskMatrix cases={useCases} />
+                  </div>
+                </Card>
+                <Card>
+                  <div className="p-5">
+                    <h2 className="mb-3 font-bold text-[#222222]">Documentos generados</h2>
+                    <DocCategoryBars docStats={docStats} />
+                  </div>
+                </Card>
               </div>
+
+              {/* Indicadores */}
+              <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+                <MiniKpi title="Casos de uso" value={useCases.length} note="registrados" />
+                <MiniKpi title="Alto / crítico" value={highRiskCount} note="casos priorizados" />
+                <MiniKpi title="Herramientas" value={org.tools.length} note="en inventario" />
+                <MiniKpi title="GPTs internos" value={gpts.length} note="registrados" />
+                <MiniKpi title="Incidentes abiertos" value={openIncidentsCount} note={`${incidents.length} en total`} />
+                <MiniKpi title="Cumplimiento" value={`${complianceScore}%`} note={complianceLabel} />
+              </div>
+
+              {/* Actividad reciente */}
+              <Card className="mt-6">
+                <div className="p-6">
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <h2 className="text-xl font-bold text-[#222222]">Actividad reciente</h2>
+                    <Badge className="border-[#e5e5e5] text-[#757575]">Últimos eventos</Badge>
+                  </div>
+                  <ActivityFeed activity={activity} />
+                </div>
+              </Card>
 
               {/* Política simulada por tipo */}
               <Card className="mt-6 border-[#b00020]/20 bg-[#fff5f6]">
@@ -3557,6 +3780,18 @@ function App() {
                         {["Sí", "Parcial", "No"].map((o) => <option key={o}>{o}</option>)}
                       </SelectInput>
                     </Field>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Field label="Probabilidad de fallo" help="¿Qué tan probable es que este caso genere un problema (error, fuga, sesgo)?">
+                        <SelectInput value={newCase.prob} onChange={(e) => setNewCase({ ...newCase, prob: e.target.value })}>
+                          {["Baja", "Media", "Alta"].map((o) => <option key={o}>{o}</option>)}
+                        </SelectInput>
+                      </Field>
+                      <Field label="Impacto si falla" help="Si algo sale mal en este caso, ¿qué tan grave sería para la organización?">
+                        <SelectInput value={newCase.impact} onChange={(e) => setNewCase({ ...newCase, impact: e.target.value })}>
+                          {["Bajo", "Medio", "Alto", "Crítico"].map((o) => <option key={o}>{o}</option>)}
+                        </SelectInput>
+                      </Field>
+                    </div>
                     {editingCaseId ? (
                       <div className="flex gap-2">
                         <AppButton onClick={updateCase} disabled={!newCase.name.trim()} className="flex-1">✓ Guardar cambios</AppButton>
@@ -4143,20 +4378,9 @@ function App() {
 
           {/* ── PANEL DE CUMPLIMIENTO ─────────────────────────── */}
           {active === "cumplimiento" && (() => {
-            const checks = [
-              { label: "Diagnóstico de organización completado", done: !!org.name, action: () => setActive("diagnostico"), weight: 15 },
-              { label: "Inventario de herramientas activo", done: org.tools.length > 0, action: () => setActive("inventario"), weight: 10 },
-              { label: "Mínimo 1 caso de uso registrado", done: useCases.length > 0, action: () => setActive("casos"), weight: 15 },
-              { label: "Responsable de IA nombrado", done: !!roles.responsable, action: () => setActive("roles"), weight: 25 },
-              { label: "Flujos de aprobación definidos", done: !!(roles["aprobacion_Bajo"] && roles["aprobacion_Medio"]), action: () => setActive("aprobaciones"), weight: 15 },
-              { label: "Política de datos documentada", done: Object.keys(dataPolicy).filter((k) => k.endsWith("_notas")).some((k) => !!dataPolicy[k]) || !!dataPolicy.notas, action: () => setActive("datosPolitica"), weight: 10 },
-              { label: "GPTs internos registrados", done: gpts.length > 0 || !org.tools.includes("GPT interno"), action: () => setActive("gpts"), weight: 5 },
-              { label: "Al menos 1 incidente analizado", done: incidents.length > 0, action: () => setActive("incidentes"), weight: 5 },
-            ];
-            const totalWeight = checks.reduce((s, c) => s + c.weight, 0);
-            const earnedWeight = checks.filter((c) => c.done).reduce((s, c) => s + c.weight, 0);
-            const compScore = Math.round((earnedWeight / totalWeight) * 100);
-            const compLabel = compScore >= 80 ? "Sólida" : compScore >= 60 ? "En construcción" : compScore >= 40 ? "Básica" : "Inicial";
+            const checks = complianceChecks;
+            const compScore = complianceScore;
+            const compLabel = complianceLabel;
             return (
               <Section title="Panel de cumplimiento" subtitle="Estado consolidado de tu gobernanza de IA — qué está hecho, qué falta y por dónde continuar.">
                 <InfoBlock
