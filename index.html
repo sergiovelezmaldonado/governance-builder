@@ -20,7 +20,7 @@
     <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone@7.29.7/babel.min.js"></script>
-    <meta name="futuria-version" content="v1.4-2026-07-14" />
+    <meta name="futuria-version" content="v1.5-2026-07-14" />
   </head>
   <body>
     <div id="root"></div>
@@ -280,6 +280,7 @@ const docTypes = [
   "Anexo legal y de compliance",
   "Anexo de seguridad de la información",
   "Anexo de propiedad intelectual",
+  "Mapeo a marcos: ISO/IEC 42001 y NIST AI RMF",
   "Manual interno de uso responsable de IA",
   "Declaración pública de uso responsable de IA",
 ];
@@ -1874,16 +1875,24 @@ AVISO: este anexo es informativo y estructural. No es asesoría jurídica. Revis
   → Derecho de los interesados: acceso, rectificación, supresión, portabilidad, objeción.
   → Notificación de brechas a la autoridad en plazos legales (72h en RGPD).
 
-1.2 IA ACT (REFERENCIA EUROPEA — APLICABLE EN CONTEXTOS GLOBALES)
-  El EU AI Act (vigente desde 2024) clasifica sistemas de IA en:
-  - Riesgo inaceptable: prohibidos (manipulación subliminal, reconocimiento biométrico masivo).
-  - Alto riesgo: regulados con evaluación previa (RRHH, crédito, educación, servicios públicos).
-  - Limitado riesgo: obligaciones de transparencia (chatbots, deepfakes).
-  - Riesgo mínimo: sin regulación específica.
+1.2 EU AI ACT (REFERENCIA EUROPEA — APLICABLE EN CONTEXTOS GLOBALES)
+  El Reglamento europeo de IA está en vigor desde agosto de 2024 y clasifica los sistemas en cuatro niveles: riesgo inaceptable (prohibidos: manipulación subliminal, reconocimiento biométrico masivo), alto riesgo (regulados con evaluación previa: RRHH, crédito, educación, servicios públicos), riesgo limitado (obligaciones de transparencia: chatbots, contenido sintético) y riesgo mínimo (sin obligaciones específicas).
+
+  Calendario de aplicación (estado a julio de 2026):
+  - Prohibiciones de riesgo inaceptable: aplican desde febrero de 2025.
+  - Obligaciones para modelos de propósito general (GPAI): aplican desde agosto de 2025.
+  - Transparencia (art. 50): informar cuando una persona interactúa con IA y etiquetar contenido sintético — aplica desde el 2 de agosto de 2026.
+  - Sistemas de alto riesgo: plazos pospuestos por el paquete de simplificación aprobado en junio de 2026 — aplican desde el 2 de diciembre de 2027 (usos del Anexo III) y desde agosto de 2028 (IA integrada en productos regulados, Anexo I).
 
   Aunque ${name} opere fuera de la UE, este marco es referencia global creciente.
+
+1.3 PANORAMA LATINOAMERICANO (estado a julio de 2026)
+  - Brasil: PL 2338/2023 (marco legal de IA con clasificación por riesgo y multas de hasta R$50 millones) aprobado por el Senado; en análisis en la Cámara de Diputados.
+  - Perú: Ley 31814 de promoción del uso de la IA y su reglamento, vigente desde enero de 2026.
+  - Chile: proyecto de ley de IA en tramitación en el Congreso Nacional.
+  - Resto de la región: proyectos legislativos en curso en la mayoría de países. Verificar el estado normativo vigente en cada jurisdicción donde opere ${name}.
 ${isRegulated ? `
-1.3 REGULACIÓN SECTORIAL ESPECÍFICA
+1.4 REGULACIÓN SECTORIAL ESPECÍFICA
   Por el perfil de ${name}, revisar con legal:
   → Regulación del supervisor sectorial sobre decisiones automatizadas.
   → Obligaciones de trazabilidad y explicabilidad en sistemas de IA.
@@ -2075,6 +2084,79 @@ Responsable: ___________________________ | Área legal: ________________________
 Generado por FuturIA Governance Builder | ${today} | futuria.substack.com`;
 }
 
+function buildMapeoMarcos(org) {
+  const name = org.name || "la organización";
+  const today = new Date().toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" });
+  return `MAPEO A MARCOS INTERNACIONALES — ISO/IEC 42001 Y NIST AI RMF
+${name} | Versión: 1.0 | Fecha: ${today}
+─────────────────────────────────────────────────────
+AVISO: este mapeo es una correspondencia orientativa entre la política generada y dos marcos internacionales de gestión de IA. No constituye una certificación ni una auditoría. Sirve como puente para una implantación formal acompañada por profesionales.
+
+1. MARCOS DE REFERENCIA
+
+ISO/IEC 42001:2023 — Sistema de gestión de inteligencia artificial (SGIA)
+  Primera norma internacional certificable de gestión de IA. Estructura: cláusulas 4 a 10 (contexto, liderazgo, planificación, soporte, operación, evaluación del desempeño y mejora) más controles del Anexo A.
+
+NIST AI Risk Management Framework 1.0 (EE.UU.)
+  Marco voluntario de gestión de riesgos de IA organizado en cuatro funciones: GOVERN (gobierno y cultura), MAP (contexto y categorización de riesgos), MEASURE (evaluación y métricas) y MANAGE (priorización y respuesta).
+
+2. CORRESPONDENCIA — SECCIONES DE LA POLÍTICA DE ${name.toUpperCase()}
+
+SECCIÓN DE LA POLÍTICA          → ISO/IEC 42001              → NIST AI RMF
+1. Propósito                    → Cl. 5.2 (política de IA)   → GOVERN
+2. Alcance                      → Cl. 4.3 (alcance del SGIA) → GOVERN
+4. Principios                   → Cl. 5.2 + Anexo A.2        → GOVERN
+5-7. Usos permitidos/
+     restringidos/prohibidos    → Anexo A.9 (uso responsable)→ MAP + MANAGE
+8. Protección de datos          → Anexo A.7 (datos para IA)  → MAP + MEASURE
+9. Supervisión humana           → Cl. 8 + Anexo A.9          → GOVERN + MANAGE
+10. Propiedad intelectual       → Anexo A.8 (información a
+                                  partes interesadas)        → GOVERN
+11. Cumplimiento regulatorio    → Cl. 4.1-4.2 (contexto y
+                                  requisitos)                → GOVERN + MAP
+12. Estructura de gobierno      → Cl. 5.3 + Anexo A.3 (roles)→ GOVERN
+13. Incidentes                  → Cl. 10.2 (no conformidad)  → MANAGE
+15. Actualización               → Cl. 9-10 (revisión y
+                                  mejora continua)           → Las 4 funciones
+
+3. CORRESPONDENCIA — MÓDULOS DE LA HERRAMIENTA
+
+MÓDULO                          → ISO/IEC 42001              → NIST AI RMF
+Diagnóstico inicial             → Cl. 4 (contexto)           → MAP
+Inventario de IA                → Anexo A.6 (ciclo de vida)  → MAP
+Casos de uso + clasificador
+de riesgos                      → Cl. 6.1 (riesgos) + A.5
+                                  (evaluación de impacto)    → MAP + MEASURE
+Matriz de riesgos               → Cl. 6.1                    → MEASURE
+Roles y comité                  → Cl. 5.3 + Anexo A.3        → GOVERN
+Formulario de evaluación
+de impacto                      → Anexo A.5 + Cl. 8.4        → MEASURE
+Registro de incidentes          → Cl. 10.2                   → MANAGE
+Plan de formación interna       → Cl. 7.2-7.3 (competencia
+                                  y concienciación)          → GOVERN
+Política de proveedores de IA   → Anexo A.10 (terceros)      → GOVERN + MANAGE
+Panel de cumplimiento           → Cl. 9 (evaluación del
+                                  desempeño)                 → MEASURE
+
+4. BRECHAS TÍPICAS HACIA UNA CERTIFICACIÓN ISO/IEC 42001
+
+Lo que esta herramienta estructura es la base documental. Para una certificación formal, ${name} necesitaría además:
+  [ ] Auditorías internas programadas del SGIA (Cl. 9.2).
+  [ ] Revisión por la dirección documentada (Cl. 9.3).
+  [ ] Evidencia de mejora continua y tratamiento de no conformidades (Cl. 10).
+  [ ] Evaluaciones de impacto formales por sistema de IA (Anexo A.5).
+  [ ] Acompañamiento de un organismo certificador acreditado.
+
+5. CÓMO USAR ESTE MAPEO
+
+  → Presentarlo a dirección o auditoría como evidencia de alineación inicial con marcos reconocidos.
+  → Priorizar las brechas de la sección 4 según el nivel de exposición regulatoria de ${name}.
+  → Revisarlo cuando se actualice la política o cambie la versión de los marcos.
+
+─────────────────────────────────────────────────────
+Generado por FuturIA Governance Builder | ${today} | futuria.substack.com`;
+}
+
 function buildManualInterno(org, useCases) {
   const name = org.name || "la organización";
   const today = new Date().toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" });
@@ -2263,6 +2345,7 @@ function buildDocument(docName, org, useCases) {
     case "Anexo legal y de compliance": return buildAnexoLegal(org);
     case "Anexo de seguridad de la información": return buildAnexoSeguridad(org);
     case "Anexo de propiedad intelectual": return buildAnexoPropiedadIntelectual(org);
+    case "Mapeo a marcos: ISO/IEC 42001 y NIST AI RMF": return buildMapeoMarcos(org);
     case "Manual interno de uso responsable de IA": return buildManualInterno(org, useCases);
     case "Declaración pública de uso responsable de IA": return buildDeclaracionPublica(org);
     default: return `Documento "${docName}" no disponible.`;
@@ -2279,14 +2362,50 @@ function escapeHtml(v) {
 
 function cn(...classes) { return classes.filter(Boolean).join(" "); }
 
-function downloadAsWord(content, filename) {
-  const html = `<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(filename)}</title></head><body><pre style="font-family:Arial;white-space:pre-wrap;line-height:1.6;max-width:800px;margin:40px auto">${escapeHtml(content)}</pre></body></html>`;
-  const blob = new Blob(["﻿", html], { type: "application/msword" });
+// Librería docx cargada bajo demanda (solo cuando el usuario descarga) para no penalizar la carga inicial
+let docxLoadPromise = null;
+function loadDocxLib() {
+  if (window.docx) return Promise.resolve(window.docx);
+  if (!docxLoadPromise) {
+    docxLoadPromise = new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = "https://unpkg.com/docx@9.7.1/dist/index.iife.js";
+      s.onload = () => (window.docx ? resolve(window.docx) : reject(new Error("docx no disponible")));
+      s.onerror = () => { docxLoadPromise = null; reject(new Error("No se pudo cargar la librería de Word")); };
+      document.head.appendChild(s);
+    });
+  }
+  return docxLoadPromise;
+}
+
+function triggerBlobDownload(blob, filename) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url; a.download = filename + ".doc";
+  a.href = url; a.download = filename;
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
+}
+
+async function downloadAsWord(content, filename) {
+  try {
+    const docx = await loadDocxLib();
+    const { Document, Packer, Paragraph, TextRun } = docx;
+    const paragraphs = String(content).split("\n").map((line) => {
+      const trimmed = line.trim();
+      const isHeading = trimmed.length > 2 && /[A-ZÁÉÍÓÚÑ]/.test(trimmed) && trimmed === trimmed.toUpperCase();
+      return new Paragraph({
+        children: [new TextRun({ text: line, font: "Arial", size: 21, bold: isHeading })],
+        spacing: { after: 60 },
+      });
+    });
+    const doc = new Document({ sections: [{ children: paragraphs }] });
+    const blob = await Packer.toBlob(doc);
+    triggerBlobDownload(blob, filename + ".docx");
+  } catch {
+    // Respaldo si el CDN no responde: HTML con extensión .doc (método anterior)
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(filename)}</title></head><body><pre style="font-family:Arial;white-space:pre-wrap;line-height:1.6;max-width:800px;margin:40px auto">${escapeHtml(content)}</pre></body></html>`;
+    triggerBlobDownload(new Blob(["﻿", html], { type: "application/msword" }), filename + ".doc");
+  }
 }
 
 // ─── Componentes UI base ─────────────────────────────────────────────────────
@@ -2395,6 +2514,10 @@ function ExportDisclaimerModal({ open, onConfirm, onCancel, action }) {
           <AppButton variant="secondary" onClick={onCancel}>Volver</AppButton>
           <AppButton onClick={onConfirm}>Entendido — {action}</AppButton>
         </div>
+        <p className="mt-4 text-right text-xs text-[#757575]">
+          ¿Quieres que te acompañemos a implementarla?{" "}
+          <a href={`mailto:sergiovelezmaldonado.ca@gmail.com?subject=${encodeURIComponent("Acompañamiento — Política de IA (FuturIA Governance Builder)")}`} className="font-semibold text-[#b00020] hover:underline">Escríbenos</a>
+        </p>
       </div>
     </div>
   );
@@ -2449,10 +2572,16 @@ function DocViewerModal({ open, docName, content, onClose, onDownload, onPrint }
           </div>
           <pre className="whitespace-pre-wrap rounded-2xl border border-[#e5e5e5] bg-[#fafafa] p-5 font-sans text-xs leading-relaxed text-[#333333]">{content}</pre>
         </div>
-        <div className="flex flex-wrap justify-end gap-3 border-t border-[#e5e5e5] px-6 py-4">
-          <AppButton variant="secondary" onClick={onClose}>Cerrar</AppButton>
-          <AppButton variant="secondary" onClick={onPrint}>Imprimir / PDF</AppButton>
-          <AppButton onClick={onDownload}>↓ Descargar Word</AppButton>
+        <div className="border-t border-[#e5e5e5] px-6 py-4">
+          <div className="flex flex-wrap justify-end gap-3">
+            <AppButton variant="secondary" onClick={onClose}>Cerrar</AppButton>
+            <AppButton variant="secondary" onClick={onPrint}>Imprimir / PDF</AppButton>
+            <AppButton onClick={onDownload}>↓ Descargar Word</AppButton>
+          </div>
+          <p className="mt-3 text-right text-xs text-[#757575]">
+            ¿Quieres que te acompañemos a implementarlo?{" "}
+            <a href={`mailto:sergiovelezmaldonado.ca@gmail.com?subject=${encodeURIComponent(`Acompañamiento — ${docName} (FuturIA Governance Builder)`)}`} className="font-semibold text-[#b00020] hover:underline">Escríbenos</a>
+          </p>
         </div>
       </div>
     </div>
@@ -2549,9 +2678,24 @@ function UseCaseTable({ useCases, searchQuery, onSearchChange, onEdit, onDelete,
 
 // ─── Storage ──────────────────────────────────────────────────────────────────
 
-const STORAGE_KEY = "futuria_governance_v2";
-function loadFromStorage() { try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; } catch { return null; } }
-function saveToStorage(data) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {} }
+const LEGACY_STORAGE_KEY = "futuria_governance_v2";
+const STORE_KEY = "futuria_governance_v3";
+
+// Almacén multi-organización: { active: id, profiles: { [id]: { org, useCases, gpts, roles, incidents, dataPolicy } } }
+function readAllStore() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.profiles && Object.keys(parsed.profiles).length) return parsed;
+    }
+  } catch {}
+  // Migración desde el almacén de una sola organización (v2). El legado se conserva intacto.
+  let legacy = null;
+  try { const r = localStorage.getItem(LEGACY_STORAGE_KEY); legacy = r ? JSON.parse(r) : null; } catch {}
+  return { active: "p1", profiles: { p1: legacy || {} } };
+}
+function writeAllStore(store) { try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch {} }
 
 const defaultOrg = {
   name: "", type: "Pyme", country: "Ecuador", sector: "Servicios profesionales",
@@ -2570,8 +2714,14 @@ const defaultRoles = { responsable: "", cargo: "", email: "", responsabilidades:
 // ─── App ──────────────────────────────────────────────────────────────────────
 
 function App() {
-  const stored = loadFromStorage();
+  const initialStore = readAllStore();
+  const initialActive = initialStore.profiles[initialStore.active] ? initialStore.active : Object.keys(initialStore.profiles)[0];
+  const stored = initialStore.profiles[initialActive] || null;
 
+  const [activeProfile, setActiveProfile] = useState(initialActive);
+  const [profiles, setProfiles] = useState(
+    Object.keys(initialStore.profiles).map((id) => ({ id, name: (initialStore.profiles[id].org && initialStore.profiles[id].org.name) || "" }))
+  );
   const [active, setActive] = useState("comoUsar");
   const [aboutOpen, setAboutOpen] = useState(false);
   const [exportModal, setExportModal] = useState(null);
@@ -2599,9 +2749,22 @@ function App() {
   const [newIncident, setNewIncident] = useState({ desc: "", tool: "", data: "No aplica", severity: "Menor", status: "Detectado", date: new Date().toLocaleDateString("es-ES") });
 
   useEffect(() => {
-    saveToStorage({ org, useCases, gpts, roles, incidents, dataPolicy });
+    const all = readAllStore();
+    all.active = activeProfile;
+    if (!all.profiles) all.profiles = {};
+    all.profiles[activeProfile] = { org, useCases, gpts, roles, incidents, dataPolicy };
+    writeAllStore(all);
+    setProfiles((prev) => {
+      const idx = prev.findIndex((p) => p.id === activeProfile);
+      const name = org.name || "";
+      if (idx === -1) return [...prev, { id: activeProfile, name }];
+      if (prev[idx].name === name) return prev;
+      const next = [...prev];
+      next[idx] = { ...next[idx], name };
+      return next;
+    });
     setSavedAt(new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }));
-  }, [org, useCases, gpts, roles, incidents, dataPolicy]);
+  }, [org, useCases, gpts, roles, incidents, dataPolicy, activeProfile]);
 
   const score = useMemo(() => calculateReadinessScore(org, useCases), [org, useCases]);
   const generatedPolicy = useMemo(() => buildPolicy(org), [org]);
@@ -2681,6 +2844,52 @@ function App() {
     showSuccess("Incidente registrado correctamente.");
   }
 
+  function applyProfileData(d) {
+    setOrg(d.org ? { ...emptyOrg, ...d.org } : { ...emptyOrg });
+    setUseCases(Array.isArray(d.useCases) ? d.useCases : []);
+    setGpts(Array.isArray(d.gpts) ? d.gpts : []);
+    setRoles(d.roles && typeof d.roles === "object" ? { ...defaultRoles, ...d.roles } : defaultRoles);
+    setIncidents(Array.isArray(d.incidents) ? d.incidents : []);
+    setDataPolicy(d.dataPolicy && typeof d.dataPolicy === "object" ? d.dataPolicy : { notas: "" });
+  }
+
+  function switchProfile(id) {
+    if (id === activeProfile) return;
+    const all = readAllStore();
+    applyProfileData((all.profiles && all.profiles[id]) || {});
+    setActiveProfile(id);
+    showSuccess("Organización cambiada.");
+  }
+
+  function createProfile() {
+    const id = "p" + Date.now().toString(36) + Math.floor(Math.random() * 1000);
+    setProfiles((prev) => [...prev, { id, name: "" }]);
+    applyProfileData({});
+    setActiveProfile(id);
+    setActive("diagnostico");
+    showSuccess("Nueva organización creada. Completa su diagnóstico.");
+  }
+
+  function deleteActiveProfile() {
+    if (profiles.length <= 1) return;
+    setConfirmModal({
+      title: "¿Eliminar esta organización?",
+      message: "Se borrarán todos los datos de la organización activa. Esta acción no se puede deshacer.",
+      onConfirm: () => {
+        const remaining = profiles.filter((p) => p.id !== activeProfile);
+        const all = readAllStore();
+        if (all.profiles) delete all.profiles[activeProfile];
+        all.active = remaining[0].id;
+        writeAllStore(all);
+        setProfiles(remaining);
+        applyProfileData((all.profiles && all.profiles[remaining[0].id]) || {});
+        setActiveProfile(remaining[0].id);
+        setConfirmModal(null);
+        showSuccess("Organización eliminada.");
+      },
+    });
+  }
+
   function loadSample() {
     setConfirmModal({
       title: "¿Cargar datos simulados?",
@@ -2725,12 +2934,7 @@ function App() {
         title: "¿Importar respaldo?",
         message: "Esto reemplazará todos los datos actuales con los del archivo importado.",
         onConfirm: () => {
-          setOrg({ ...emptyOrg, ...d.org });
-          setUseCases(Array.isArray(d.useCases) ? d.useCases : []);
-          setGpts(Array.isArray(d.gpts) ? d.gpts : []);
-          setRoles(d.roles && typeof d.roles === "object" ? { ...defaultRoles, ...d.roles } : defaultRoles);
-          setIncidents(Array.isArray(d.incidents) ? d.incidents : []);
-          setDataPolicy(d.dataPolicy && typeof d.dataPolicy === "object" ? d.dataPolicy : { notas: "" });
+          applyProfileData(d);
           setConfirmModal(null);
           showSuccess("Respaldo importado correctamente.");
         },
@@ -2740,10 +2944,10 @@ function App() {
     reader.readAsText(file);
   }
 
-  function downloadCurrentPolicy() {
+  async function downloadCurrentPolicy() {
     const content = generatedPolicy;
     const name = (org.name || "mi-organizacion").toLowerCase().replace(/\s+/g, "-");
-    downloadAsWord(content, `politica-ia-${name}`);
+    await downloadAsWord(content, `politica-ia-${name}`);
     showSuccess("Documento descargado.");
   }
 
@@ -2756,10 +2960,10 @@ function App() {
     if (!popup) { const a = document.createElement("a"); a.href = url; a.download = "politica-ia.html"; document.body.appendChild(a); a.click(); a.remove(); showSuccess("Descargado como HTML. Ábrelo en el navegador para imprimir."); }
   }
 
-  function downloadSimulated() {
+  async function downloadSimulated() {
     const content = buildSimulatedPolicy(simOrgType);
     const slug = simOrgType.toLowerCase().replace(/\s+/g, "-").replace(/[áéíóúñ]/g, (c) => ({ á:"a",é:"e",í:"i",ó:"o",ú:"u",ñ:"n" }[c] || c));
-    downloadAsWord(content, `politica-simulada-${slug}`);
+    await downloadAsWord(content, `politica-simulada-${slug}`);
     showSuccess(`Política simulada para "${simOrgType}" descargada.`);
   }
 
@@ -2768,10 +2972,10 @@ function App() {
     setDocViewer({ name: docName, content });
   }
 
-  function downloadDocViewer() {
+  async function downloadDocViewer() {
     if (!docViewer) return;
-    const slug = docViewer.name.toLowerCase().replace(/\s+/g, "-").replace(/[áéíóúñ]/g, c => ({ á:"a",é:"e",í:"i",ó:"o",ú:"u",ñ:"n" }[c] || c));
-    downloadAsWord(docViewer.content, slug);
+    const slug = docViewer.name.toLowerCase().replace(/\s+/g, "-").replace(/[áéíóúñ]/g, c => ({ á:"a",é:"e",í:"i",ó:"o",ú:"u",ñ:"n" }[c] || c)).replace(/[^a-z0-9-]/g, "");
+    await downloadAsWord(docViewer.content, slug);
     showSuccess("Documento descargado.");
   }
 
@@ -2850,7 +3054,18 @@ function App() {
               <p className="text-xs text-[#757575]">Crea, adapta y monitorea tu política de uso responsable de IA generativa.</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={activeProfile}
+              onChange={(e) => { const v = e.target.value; if (v === "__new__") createProfile(); else switchProfile(v); }}
+              aria-label="Organización activa"
+              className="max-w-[180px] rounded-2xl border border-[#e5e5e5] bg-white px-3 py-2 text-sm font-semibold text-[#333333] outline-none focus:border-[#b00020]">
+              {profiles.map((p, i) => (<option key={p.id} value={p.id}>{p.name || `Organización ${i + 1}`}</option>))}
+              <option value="__new__">➕ Nueva organización…</option>
+            </select>
+            {profiles.length > 1 && (
+              <button onClick={deleteActiveProfile} aria-label="Eliminar organización activa" title="Eliminar organización activa" className="rounded-full border border-[#e5e5e5] px-2.5 py-2 text-sm text-[#757575] hover:bg-[#fff5f6]">🗑</button>
+            )}
             <AppButton variant="secondary" onClick={() => setAboutOpen(true)}>Acerca de</AppButton>
             <a href="https://futuria.substack.com/" target="_blank" rel="noreferrer"><AppButton>Únete a FuturIA</AppButton></a>
           </div>
@@ -3070,7 +3285,7 @@ function App() {
                 <Kpi title="Preparación" value={`${score}/100`} note={readinessLabel} icon="◷" />
                 <Kpi title="Casos registrados" value={useCases.length} note={`${highRiskCount} en riesgo alto o crítico`} icon="◆" />
                 <Kpi title="Herramientas" value={org.tools.length} note="registradas en inventario" icon="◈" />
-                <Kpi title="Documentos" value="24" note="tipos disponibles" icon="¶" />
+                <Kpi title="Documentos" value={docTypes.length} note="tipos disponibles" icon="¶" />
               </div>
 
               {/* Política simulada por tipo */}
@@ -3474,7 +3689,7 @@ function App() {
             <Section title="Centro de documentos y anexos" subtitle="Genera, visualiza y descarga cualquier documento de gobernanza de IA adaptado a tu organización.">
               <InfoBlock
                 icon="◧"
-                what="Un catálogo de 24 tipos de documentos de gobernanza de IA: políticas, registros, formularios, protocolos y anexos especializados."
+                what={`Un catálogo de ${docTypes.length} tipos de documentos de gobernanza de IA: políticas, registros, formularios, protocolos, anexos especializados y mapeo a marcos internacionales.`}
                 why="Una gobernanza completa no es solo una política: es un ecosistema documental proporcional al riesgo y al tamaño de la organización."
                 how="Haz clic en 'Generar' para crear el documento con los datos de tu organización. Puedes verlo, imprimirlo o descargarlo en Word. Todos se personalizan con el diagnóstico que completaste."
               />
