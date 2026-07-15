@@ -20,7 +20,7 @@
     <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone@7.29.7/babel.min.js"></script>
-    <meta name="futuria-version" content="v1.6-2026-07-14" />
+    <meta name="futuria-version" content="v1.7-2026-07-15" />
   </head>
   <body>
     <div id="root"></div>
@@ -56,10 +56,13 @@ const sectors = [
   "Marketing / Comunicación",
 ];
 
-const tools = [
-  "ChatGPT", "Claude", "Gemini", "Copilot", "Perplexity",
-  "Notion AI", "Canva AI", "Midjourney", "GPT interno", "Otro",
+const TOOL_GROUP_FOUNDATIONAL = "Asistentes y modelos fundacionales";
+const TOOL_GROUP_SPECIALIZED = "Herramientas especializadas";
+const toolGroups = [
+  { key: TOOL_GROUP_FOUNDATIONAL, items: ["ChatGPT", "Claude", "Gemini", "Copilot", "Perplexity", "NotebookLM", "DeepSeek", "Kimi", "Qwen", "Mistral", "Grok", "Llama", "Amazon Nova"] },
+  { key: TOOL_GROUP_SPECIALIZED, items: ["Canva AI", "Midjourney", "ElevenLabs", "Runway", "Lovable", "HeyGen", "Suno", "Ideogram", "Higgsfield"] },
 ];
+const tools = [...toolGroups[0].items, ...toolGroups[1].items, "Otro"];
 
 // Opciones de área para casos de uso
 const areaOptions = [
@@ -79,6 +82,13 @@ const areaOptions = [
   "Administración",
   "Otro",
 ];
+
+// Taxonomía de activos de IA personalizados
+const assetTypes = ["GPT personalizado", "Asistente / Proyecto", "Artefacto / App generada", "Dashboard interactivo", "Skill / Comando", "Agente autónomo", "Automatización / Flujo", "Otro"];
+// Riesgo sugerido por tipo: a mayor autonomía del activo, mayor punto de partida
+const assetTypeRisk = { "Agente autónomo": "Alto", "Automatización / Flujo": "Alto", "Dashboard interactivo": "Medio" };
+const assetStatuses = ["Activo", "En prueba", "Retirado"];
+const assetPlatforms = ["ChatGPT", "Claude", "Gemini", "Copilot", "Zapier / Make / n8n", "App propia / web", "Otro"];
 
 const GPT_LIBRARY = [
   // ── Atención al cliente ─────────────────────────────────────────────
@@ -192,6 +202,31 @@ const GPT_LIBRARY = [
   { category: "Investigación y desarrollo", name: "Redactor de informes de tendencias", purpose: "Producir informes sobre tendencias tecnológicas, regulatorias o de mercado para decisiones de I+D", area: "Investigación y Desarrollo", platform: "Perplexity", dataLevel: "Público", riskLevel: "Bajo", access: "Equipo específico" },
   { category: "Investigación y desarrollo", name: "Generador de hipótesis de producto", purpose: "Proponer hipótesis e ideas fundamentadas para nuevos productos, servicios o mejoras de portafolio", area: "Investigación y Desarrollo", platform: "Claude", dataLevel: "Interno", riskLevel: "Bajo", access: "Equipo específico" },
   { category: "Investigación y desarrollo", name: "Asistente de validación de ideas", purpose: "Ayudar a estructurar procesos de validación de conceptos, prototipos o propuestas de valor con usuarios", area: "Investigación y Desarrollo", platform: "ChatGPT", dataLevel: "Interno", riskLevel: "Bajo", access: "Equipo específico" },
+  // ── Artefactos y apps generadas ──────────────────────────
+  { category: "Artefactos y apps generadas", name: "Calculadora de ROI de proyectos de IA", purpose: "Estimar retorno de inversión de iniciativas de IA con supuestos editables por dirección", area: "Finanzas y Contabilidad", platform: "Claude", dataLevel: "Interno", riskLevel: "Bajo", access: "Equipo específico", kind: "Artefacto / App generada" },
+  { category: "Artefactos y apps generadas", name: "Simulador de escenarios de precios", purpose: "Comparar escenarios de precios y márgenes con variables ajustables para decisiones comerciales", area: "Dirección / Gerencia General", platform: "Claude", dataLevel: "Confidencial", riskLevel: "Medio", access: "Equipo específico", kind: "Artefacto / App generada" },
+  { category: "Artefactos y apps generadas", name: "App de checklist de onboarding", purpose: "Guiar el proceso de incorporación de nuevos colaboradores con pasos verificables", area: "Talento humano / RRHH", platform: "Claude", dataLevel: "Interno", riskLevel: "Bajo", access: "Toda la organización", kind: "Artefacto / App generada" },
+  { category: "Artefactos y apps generadas", name: "Generador de propuestas interactivas", purpose: "Producir propuestas comerciales navegables a partir de datos del cliente y catálogo de servicios", area: "Ventas y Comercial", platform: "App propia / web", dataLevel: "Interno", riskLevel: "Medio", access: "Equipo específico", kind: "Artefacto / App generada" },
+  // ── Dashboards interactivos ──────────────────────────────
+  { category: "Dashboards interactivos", name: "Dashboard de ventas semanal", purpose: "Visualizar pipeline, conversión y cumplimiento de metas comerciales en tiempo real", area: "Ventas y Comercial", platform: "App propia / web", dataLevel: "Confidencial", riskLevel: "Medio", access: "Equipo específico", kind: "Dashboard interactivo" },
+  { category: "Dashboards interactivos", name: "Panel de indicadores de marketing", purpose: "Consolidar métricas de campañas, alcance y costo de adquisición para revisión mensual", area: "Marketing y Comunicación", platform: "App propia / web", dataLevel: "Interno", riskLevel: "Bajo", access: "Equipo específico", kind: "Dashboard interactivo" },
+  { category: "Dashboards interactivos", name: "Dashboard de madurez de IA", purpose: "Presentar a dirección el avance de la adopción de IA por área con indicadores comparables", area: "Dirección / Gerencia General", platform: "App propia / web", dataLevel: "Interno", riskLevel: "Bajo", access: "Toda la organización", kind: "Dashboard interactivo" },
+  { category: "Dashboards interactivos", name: "Panel de seguimiento de incidentes", purpose: "Monitorear incidentes de IA abiertos, severidad y tiempos de resolución", area: "Tecnología / IT", platform: "App propia / web", dataLevel: "Confidencial", riskLevel: "Medio", access: "Equipo específico", kind: "Dashboard interactivo" },
+  // ── Skills y comandos ────────────────────────────────────
+  { category: "Skills y comandos", name: "Skill de redacción con voz corporativa", purpose: "Aplicar el manual de estilo y tono de la organización a cualquier texto generado", area: "Marketing y Comunicación", platform: "Claude", dataLevel: "Interno", riskLevel: "Bajo", access: "Toda la organización", kind: "Skill / Comando" },
+  { category: "Skills y comandos", name: "Skill de análisis de contratos", purpose: "Revisar contratos contra una lista de cláusulas de riesgo definida por el equipo legal", area: "Legal y Compliance", platform: "Claude", dataLevel: "Confidencial", riskLevel: "Alto", access: "Equipo específico", kind: "Skill / Comando" },
+  { category: "Skills y comandos", name: "Comando de resumen ejecutivo semanal", purpose: "Generar el resumen semanal de dirección a partir de reportes de área con formato fijo", area: "Dirección / Gerencia General", platform: "Claude", dataLevel: "Confidencial", riskLevel: "Medio", access: "Solo creador", kind: "Skill / Comando" },
+  { category: "Skills y comandos", name: "Skill de preparación de clases", purpose: "Estructurar sesiones formativas con objetivos, actividades y materiales según plantilla institucional", area: "Educación / Formación", platform: "Claude", dataLevel: "Interno", riskLevel: "Bajo", access: "Equipo específico", kind: "Skill / Comando" },
+  // ── Agentes autónomos ────────────────────────────────────
+  { category: "Agentes autónomos", name: "Agente de investigación de mercado", purpose: "Buscar, contrastar y sintetizar información pública de mercado en informes periódicos sin intervención manual", area: "Investigación y Desarrollo", platform: "Otro", dataLevel: "Público", riskLevel: "Medio", access: "Equipo específico", kind: "Agente autónomo" },
+  { category: "Agentes autónomos", name: "Agente de prospección comercial", purpose: "Identificar y calificar prospectos, y preparar borradores de contacto para revisión del equipo", area: "Ventas y Comercial", platform: "Otro", dataLevel: "Interno", riskLevel: "Alto", access: "Equipo específico", kind: "Agente autónomo" },
+  { category: "Agentes autónomos", name: "Agente de conciliación de reportes", purpose: "Cruzar reportes financieros y señalar discrepancias para revisión humana", area: "Finanzas y Contabilidad", platform: "Otro", dataLevel: "Confidencial", riskLevel: "Alto", access: "Equipo específico", kind: "Agente autónomo" },
+  { category: "Agentes autónomos", name: "Agente de monitoreo de menciones", purpose: "Vigilar menciones de la marca en medios y redes, y alertar según criterios de severidad", area: "Marketing y Comunicación", platform: "Otro", dataLevel: "Público", riskLevel: "Medio", access: "Equipo específico", kind: "Agente autónomo" },
+  // ── Automatizaciones y flujos ────────────────────────────
+  { category: "Automatizaciones y flujos", name: "Flujo de clasificación de correos", purpose: "Clasificar y enrutar correos entrantes por tema y prioridad hacia el equipo correcto", area: "Administración", platform: "Zapier / Make / n8n", dataLevel: "Interno", riskLevel: "Medio", access: "Equipo específico", kind: "Automatización / Flujo" },
+  { category: "Automatizaciones y flujos", name: "Automatización de facturas a contabilidad", purpose: "Extraer datos de facturas recibidas y registrarlos en el sistema contable con validación posterior", area: "Finanzas y Contabilidad", platform: "Zapier / Make / n8n", dataLevel: "Confidencial", riskLevel: "Alto", access: "Equipo específico", kind: "Automatización / Flujo" },
+  { category: "Automatizaciones y flujos", name: "Flujo de publicación en redes", purpose: "Programar y publicar contenido aprobado en redes sociales con registro de cada publicación", area: "Marketing y Comunicación", platform: "Zapier / Make / n8n", dataLevel: "Público", riskLevel: "Medio", access: "Equipo específico", kind: "Automatización / Flujo" },
+  { category: "Automatizaciones y flujos", name: "Automatización de respuestas de soporte", purpose: "Responder consultas frecuentes de clientes y escalar a un humano las que superen su alcance", area: "Servicio al Cliente / CX", platform: "Zapier / Make / n8n", dataLevel: "Personal", riskLevel: "Alto", access: "Equipo específico", kind: "Automatización / Flujo" },
 ];
 
 const sampleUseCases = [
@@ -250,7 +285,7 @@ const mvpModules = [
 
 const v2Modules = [
   { id: "datosPolitica", label: "Política de datos" },
-  { id: "gpts", label: "GPTs internos" },
+  { id: "gpts", label: "Activos de IA" },
   { id: "roles", label: "Roles y comité" },
   { id: "aprobaciones", label: "Flujos de aprobación" },
   { id: "incidentes", label: "Incidentes" },
@@ -266,7 +301,7 @@ const docTypes = [
   "Registro de casos de uso",
   "Registro de herramientas aprobadas",
   "Registro de herramientas prohibidas",
-  "Registro de GPTs internos",
+  "Registro de activos de IA personalizados",
   "Formulario de solicitud de nuevo caso de uso",
   "Formulario de evaluación de impacto",
   "Protocolo de incidentes",
@@ -303,10 +338,14 @@ function classifyRisk(caseData) {
 }
 
 function calculateReadinessScore(org, useCases) {
+  // Sin diagnóstico no hay puntaje: una organización en blanco marca 0, no una cifra por defecto.
+  const diagnosed = !!(org.name && org.name.trim()) || (org.tools && org.tools.length > 0) || (useCases && useCases.length > 0);
+  if (!diagnosed) return 0;
   const typePenalty = ["Gran corporación", "Sector regulado", "Entidad pública"].includes(org.type) ? 15 : 5;
   const dataPenalty = org.sensitiveData.includes("Sí") ? 20 : 5;
   const maturityBonus = org.maturity.includes("avanzada") ? 20 : org.maturity.includes("intermedio") ? 10 : 0;
-  const policyBonus = org.policy.includes("formal") ? 18 : 0;
+  // Solo suma cuando SÍ existe política formal (evita el falso positivo de "No existe política formal").
+  const policyBonus = org.policy.startsWith("Existe") ? (org.policy.includes("audita") ? 25 : 18) : 0;
   const casesPenalty = Math.min(25, useCases.filter((c) => ["Alto", "Crítico"].includes(c.level)).length * 8);
   return Math.max(5, Math.min(100, 55 - typePenalty - dataPenalty - casesPenalty + maturityBonus + policyBonus));
 }
@@ -345,7 +384,7 @@ Aplica a colaboradores, directivos, contratistas, consultores y terceros que uti
 - Uso proporcional al riesgo.
 - Supervisión humana obligatoria en resultados relevantes.
 - Prohibición de cargar datos sensibles o confidenciales sin autorización.
-- Registro de herramientas, GPTs internos y casos de uso.
+- Registro de herramientas, activos de IA personalizados y casos de uso.
 - Transparencia cuando la IA influya en comunicaciones externas o decisiones relevantes.
 
 5. USOS PERMITIDOS
@@ -474,7 +513,7 @@ Se recomienda incluir en los contratos una cláusula que indique si se usa IA en
       name: "[Nombre de tu negocio]",
       context: "microempresa con un equipo pequeño que usa IA para acelerar operaciones, mejorar comunicaciones y dar mejor servicio",
       scope: "Aplica a todos los colaboradores del equipo, incluyendo socios, asistentes y personas contratadas por proyecto.",
-      tools: "ChatGPT, Gemini, Canva AI, Notion AI u otras herramientas adoptadas por el equipo.",
+      tools: "ChatGPT, Claude, Gemini u otras herramientas adoptadas por el equipo.",
       allowed: `- Redacción de contenido para redes sociales, sitio web y correos comerciales.
 - Atención inicial a clientes con información pública del negocio.
 - Generación de propuestas, cotizaciones y presupuestos (con revisión final).
@@ -501,7 +540,7 @@ Mantener una lista actualizada de las herramientas de IA que el equipo puede usa
       name: "[Nombre de la empresa]",
       context: "empresa mediana con múltiples áreas que está adoptando IA de manera activa y necesita estructurar su gobernanza para escalar de forma segura",
       scope: "Aplica a todos los colaboradores, líderes de área, proveedores y contratistas que usen herramientas de IA en nombre de la empresa.",
-      tools: "ChatGPT, Claude, Gemini, Copilot, herramientas sectoriales con IA integrada y eventuales GPTs internos.",
+      tools: "ChatGPT, Claude, Gemini, Copilot, herramientas sectoriales con IA integrada y eventuales activos de IA personalizados.",
       allowed: `- Redacción y mejora de comunicaciones internas y externas.
 - Análisis de información pública y síntesis de documentos no confidenciales.
 - Apoyo en generación de contenido de marketing con revisión humana.
@@ -1128,34 +1167,40 @@ Generado por FuturIA Governance Builder | futuria.substack.com`;
 function buildRegistroGPTs(org) {
   const name = org.name || "la organización";
   const today = new Date().toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" });
-  return `REGISTRO DE GPTs INTERNOS Y ASISTENTES PERSONALIZADOS
+  return `REGISTRO DE ACTIVOS DE IA PERSONALIZADOS
 ${name} | Versión: 1.0 | Fecha: ${today}
 ─────────────────────────────────────────────────────
-PROPÓSITO: inventariar todos los GPTs, asistentes personalizados o agentes de IA desarrollados o configurados por o para ${name}.
+PROPÓSITO: inventariar todos los activos de IA desarrollados o configurados por o para ${name}: GPTs personalizados, asistentes y proyectos, artefactos y apps generadas, dashboards interactivos, skills y comandos, agentes autónomos y automatizaciones con IA.
 
 ─────────────────────────────────────────────────────
-ENTRADA DE REGISTRO (duplicar para cada GPT)
+ENTRADA DE REGISTRO (duplicar para cada activo)
 
-NOMBRE DEL GPT / ASISTENTE: ___________________________
-  Plataforma base:            [ ] ChatGPT  [ ] Claude  [ ] Gemini  [ ] Otro: ___
+NOMBRE DEL ACTIVO: ___________________________
+  Tipo de activo:             [ ] GPT personalizado  [ ] Asistente / Proyecto  [ ] Artefacto / App
+                              [ ] Dashboard interactivo  [ ] Skill / Comando  [ ] Agente autónomo
+                              [ ] Automatización / Flujo  [ ] Otro: ___
+  Plataforma base:            [ ] ChatGPT  [ ] Claude  [ ] Gemini  [ ] Zapier/Make/n8n  [ ] App propia  [ ] Otro: ___
+  Responsable del activo:     ___________________________
   Desarrollado por:           ___________________________
   Fecha de creación:          ___________________________
   Propósito principal:        ___________________________
   Área(s) usuaria(s):         ___________________________
   Acceso:                     [ ] Solo creador  [ ] Equipo específico  [ ] Toda la org
-  Instrucciones del sistema:  [ ] Documentadas  [ ] Pendiente documentar
+  Instrucciones / lógica:     [ ] Documentadas  [ ] Pendiente documentar
   Datos procesados:           ___________________________
   Documentos / archivos cargados: ___________________________
   Nivel de riesgo:            [ ] Bajo  [ ] Medio  [ ] Alto  [ ] Crítico
   Aprobado por:               ___________________________
   Última auditoría:           ___________________________
-  Estado:                     [ ] Activo  [ ] Archivado  [ ] En revisión
+  Estado:                     [ ] Activo  [ ] En prueba  [ ] Retirado
 
 ─────────────────────────────────────────────────────
 NOTAS DE GOBIERNO
-- Los GPTs con acceso a datos confidenciales requieren aprobación del Comité de IA o Responsable de IA.
+- Todo activo debe tener un responsable nombrado. Un activo sin responsable es shadow AI.
+- Los agentes autónomos y las automatizaciones requieren revisión reforzada: operan con menos supervisión humana.
+- Los activos con acceso a datos confidenciales requieren aprobación del Comité de IA o Responsable de IA.
 - Revisar y actualizar este registro cada trimestre.
-- Los GPTs archivados deben documentar el motivo y fecha de retiro.
+- Los activos retirados deben documentar el motivo y fecha de retiro.
 
 Responsable del registro: ___________________________
 Generado por FuturIA Governance Builder | ${today} | futuria.substack.com`;
@@ -2331,7 +2376,7 @@ function buildDocument(docName, org, useCases) {
     case "Registro de casos de uso": return buildRegistroCasos(org, useCases);
     case "Registro de herramientas aprobadas": return buildRegistroHerramientasAprobadas(org);
     case "Registro de herramientas prohibidas": return buildRegistroHerramientasProhibidas(org);
-    case "Registro de GPTs internos": return buildRegistroGPTs(org);
+    case "Registro de activos de IA personalizados": return buildRegistroGPTs(org);
     case "Formulario de solicitud de nuevo caso de uso": return buildFormularioSolicitud(org);
     case "Formulario de evaluación de impacto": return buildFormularioEvaluacion(org);
     case "Protocolo de incidentes": return buildProtocoloIncidentes(org);
@@ -2894,7 +2939,10 @@ function App() {
   const [dataPolicy, setDataPolicy] = useState(stored?.dataPolicy || { notas: "" });
   const [activity, setActivity] = useState(Array.isArray(stored?.activity) ? stored.activity : []);
   const [docStats, setDocStats] = useState(stored?.docStats && typeof stored.docStats === "object" ? stored.docStats : {});
-  const [newGpt, setNewGpt] = useState({ name: "", platform: "ChatGPT", purpose: "", area: areaOptions[0], access: "Solo creador", dataLevel: "Público", riskLevel: "Bajo" });
+  const [customTools, setCustomTools] = useState(Array.isArray(stored?.customTools) ? stored.customTools : []);
+  const [newToolName, setNewToolName] = useState("");
+  const [newToolCat, setNewToolCat] = useState(TOOL_GROUP_FOUNDATIONAL);
+  const [newGpt, setNewGpt] = useState({ name: "", kind: assetTypes[0], platform: "ChatGPT", purpose: "", area: areaOptions[0], access: "Solo creador", dataLevel: "Público", riskLevel: "Bajo", owner: "", status: "Activo" });
   const [showGptLibrary, setShowGptLibrary] = useState(false);
   const [gptLibrarySearch, setGptLibrarySearch] = useState("");
   const [newIncident, setNewIncident] = useState({ desc: "", tool: "", data: "No aplica", severity: "Menor", status: "Detectado", date: new Date().toLocaleDateString("es-ES") });
@@ -2903,7 +2951,7 @@ function App() {
     const all = readAllStore();
     all.active = activeProfile;
     if (!all.profiles) all.profiles = {};
-    all.profiles[activeProfile] = { org, useCases, gpts, roles, incidents, dataPolicy, activity, docStats };
+    all.profiles[activeProfile] = { org, useCases, gpts, roles, incidents, dataPolicy, activity, docStats, customTools };
     writeAllStore(all);
     setProfiles((prev) => {
       const idx = prev.findIndex((p) => p.id === activeProfile);
@@ -2915,7 +2963,7 @@ function App() {
       return next;
     });
     setSavedAt(new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }));
-  }, [org, useCases, gpts, roles, incidents, dataPolicy, activity, docStats, activeProfile]);
+  }, [org, useCases, gpts, roles, incidents, dataPolicy, activity, docStats, customTools, activeProfile]);
 
   const score = useMemo(() => calculateReadinessScore(org, useCases), [org, useCases]);
   const generatedPolicy = useMemo(() => buildPolicy(org), [org]);
@@ -2926,11 +2974,12 @@ function App() {
       g.name.toLowerCase().includes(q) ||
       g.category.toLowerCase().includes(q) ||
       g.purpose.toLowerCase().includes(q) ||
-      g.area.toLowerCase().includes(q)
+      g.area.toLowerCase().includes(q) ||
+      (g.kind || "GPT personalizado").toLowerCase().includes(q)
     );
   }, [gptLibrarySearch]);
 
-  const readinessLabel = score >= 75 ? "Sólida" : score >= 50 ? "En construcción" : score >= 30 ? "Frágil" : "Crítica";
+  const readinessLabel = score === 0 ? "Sin evaluar" : score >= 75 ? "Sólida" : score >= 50 ? "En construcción" : score >= 30 ? "Frágil" : "Crítica";
   const highRiskCount = useCases.filter((c) => ["Alto", "Crítico"].includes(c.level)).length;
 
   function showSuccess(msg) { setSuccessMsg(msg); setTimeout(() => setSuccessMsg(""), 3500); }
@@ -2986,9 +3035,9 @@ function App() {
   function addGpt() {
     if (!newGpt.name.trim()) return;
     setGpts((prev) => [...prev, { id: Date.now(), ...newGpt }]);
-    logActivity(`GPT interno registrado: "${newGpt.name.trim()}"`);
-    setNewGpt({ name: "", platform: "ChatGPT", purpose: "", area: areaOptions[0], access: "Solo creador", dataLevel: "Público", riskLevel: "Bajo" });
-    showSuccess("GPT interno registrado correctamente.");
+    logActivity(`Activo de IA registrado: "${newGpt.name.trim()}" (${newGpt.kind})`);
+    setNewGpt({ name: "", kind: assetTypes[0], platform: "ChatGPT", purpose: "", area: areaOptions[0], access: "Solo creador", dataLevel: "Público", riskLevel: "Bajo", owner: "", status: "Activo" });
+    showSuccess("Activo de IA registrado correctamente.");
   }
 
   function addIncident() {
@@ -3008,6 +3057,25 @@ function App() {
     setDataPolicy(d.dataPolicy && typeof d.dataPolicy === "object" ? d.dataPolicy : { notas: "" });
     setActivity(Array.isArray(d.activity) ? d.activity : []);
     setDocStats(d.docStats && typeof d.docStats === "object" ? d.docStats : {});
+    setCustomTools(Array.isArray(d.customTools) ? d.customTools : []);
+  }
+
+  function addCustomTool() {
+    const name = newToolName.trim();
+    if (!name) return;
+    const exists = [...tools, ...customTools.map((t) => t.name)].some((t) => t.toLowerCase() === name.toLowerCase());
+    if (exists) { showError("Esa herramienta ya está en el inventario."); return; }
+    setCustomTools((prev) => [...prev, { name, cat: newToolCat }]);
+    setOrg((prev) => ({ ...prev, tools: [...prev.tools, name] }));
+    logActivity(`Herramienta propia añadida al inventario: "${name}"`);
+    setNewToolName("");
+    showSuccess("Herramienta añadida y seleccionada.");
+  }
+
+  function removeCustomTool(name) {
+    setCustomTools((prev) => prev.filter((t) => t.name !== name));
+    setOrg((prev) => ({ ...prev, tools: prev.tools.filter((t) => t !== name) }));
+    showSuccess("Herramienta propia eliminada.");
   }
 
   function logActivity(text) {
@@ -3060,7 +3128,7 @@ function App() {
       title: "¿Cargar datos simulados?",
       message: "Esto reemplazará los datos actuales de la organización y los casos de uso.",
       onConfirm: () => {
-        setOrg({ name: "FuturIA Demo", type: "Pyme", country: "Ecuador", sector: "Servicios profesionales", employees: "11-50", maturity: "Uso intermedio con áreas activas", sensitiveData: "Sí, ocasionalmente", tools: ["ChatGPT", "Gemini", "Perplexity", "GPT interno"], policy: "No existe política formal" });
+        setOrg({ name: "FuturIA Demo", type: "Pyme", country: "Ecuador", sector: "Servicios profesionales", employees: "11-50", maturity: "Uso intermedio con áreas activas", sensitiveData: "Sí, ocasionalmente", tools: ["ChatGPT", "Claude", "Perplexity", "NotebookLM"], policy: "No existe política formal" });
         setUseCases(sampleUseCases); setConfirmModal(null); showSuccess("Datos simulados cargados.");
       },
     });
@@ -3068,14 +3136,14 @@ function App() {
 
   function clearData() {
     setConfirmModal({
-      title: "¿Eliminar todos los datos?",
-      message: "Se borrarán el diagnóstico y todos los casos de uso. Esta acción no se puede deshacer.",
-      onConfirm: () => { setOrg(emptyOrg); setUseCases([]); setConfirmModal(null); showSuccess("Datos eliminados."); },
+      title: "¿Eliminar todos los datos de esta organización?",
+      message: "Se borrarán el diagnóstico, los casos de uso, los activos de IA, roles, incidentes, política de datos, actividad y herramientas propias de la organización activa. Esta acción no se puede deshacer.",
+      onConfirm: () => { applyProfileData({}); setConfirmModal(null); showSuccess("Todos los datos de la organización fueron eliminados."); },
     });
   }
 
   function exportData() {
-    const data = { app: "futuria-governance-builder", exportedAt: new Date().toISOString(), org, useCases, gpts, roles, incidents, dataPolicy, activity, docStats };
+    const data = { app: "futuria-governance-builder", exportedAt: new Date().toISOString(), org, useCases, gpts, roles, incidents, dataPolicy, activity, docStats, customTools };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -3198,7 +3266,7 @@ function App() {
     { label: "Responsable de IA nombrado", done: !!roles.responsable, action: () => setActive("roles"), weight: 25 },
     { label: "Flujos de aprobación definidos", done: !!(roles["aprobacion_Bajo"] && roles["aprobacion_Medio"]), action: () => setActive("aprobaciones"), weight: 15 },
     { label: "Política de datos documentada", done: Object.keys(dataPolicy).filter((k) => k.endsWith("_notas")).some((k) => !!dataPolicy[k]) || !!dataPolicy.notas, action: () => setActive("datosPolitica"), weight: 10 },
-    { label: "GPTs internos registrados", done: gpts.length > 0 || !org.tools.includes("GPT interno"), action: () => setActive("gpts"), weight: 5 },
+    { label: "Al menos 1 activo de IA personalizado registrado", done: gpts.length > 0, action: () => setActive("gpts"), weight: 5 },
     { label: "Al menos 1 incidente analizado", done: incidents.length > 0, action: () => setActive("incidentes"), weight: 5 },
   ];
   const complianceTotal = complianceChecks.reduce((s, c) => s + c.weight, 0);
@@ -3421,14 +3489,14 @@ function App() {
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#7c3aed] text-sm font-bold text-white">6</div>
                     <div className="flex-1">
                       <h2 className="font-bold text-[#222222]">🏛️ Activa la gobernanza avanzada</h2>
-                      <p className="mt-1.5 text-sm text-[#555555]">Los módulos V2 permiten ir más lejos: registrar GPTs internos con su biblioteca de 100 asistentes, definir roles y comité de IA, configurar flujos de aprobación, gestionar incidentes y monitorear el cumplimiento.</p>
+                      <p className="mt-1.5 text-sm text-[#555555]">Los módulos V2 permiten ir más lejos: registrar los activos de IA personalizados (GPTs, artefactos, dashboards, skills, agentes) con su biblioteca de ejemplos, definir roles y comité de IA, configurar flujos de aprobación, gestionar incidentes y monitorear el cumplimiento.</p>
                       <div className="mt-3 flex flex-wrap gap-1.5">
-                        {["GPTs internos", "Roles y comité", "Flujos de aprobación", "Incidentes", "Panel de cumplimiento"].map(t => (
+                        {["Activos de IA", "Roles y comité", "Flujos de aprobación", "Incidentes", "Panel de cumplimiento"].map(t => (
                           <span key={t} className="rounded-full border border-[#e5e5e5] bg-[#fafafa] px-2.5 py-0.5 text-xs text-[#555555]">{t}</span>
                         ))}
                       </div>
                       <p className="mt-3 text-xs text-[#888888]">💡 Empieza con los 5 pasos anteriores. Los módulos V2 son el siguiente nivel cuando la política básica ya está operativa.</p>
-                      <button onClick={() => setActive("gpts")} className="mt-3 text-xs font-semibold text-[#b00020] hover:underline">Ir a GPTs internos →</button>
+                      <button onClick={() => setActive("gpts")} className="mt-3 text-xs font-semibold text-[#b00020] hover:underline">Ir a Activos de IA →</button>
                     </div>
                   </div>
                 </div>
@@ -3495,7 +3563,7 @@ function App() {
                 <MiniKpi title="Casos de uso" value={useCases.length} note="registrados" />
                 <MiniKpi title="Alto / crítico" value={highRiskCount} note="casos priorizados" />
                 <MiniKpi title="Herramientas" value={org.tools.length} note="en inventario" />
-                <MiniKpi title="GPTs internos" value={gpts.length} note="registrados" />
+                <MiniKpi title="Activos de IA" value={gpts.length} note="personalizados registrados" />
                 <MiniKpi title="Incidentes abiertos" value={openIncidentsCount} note={`${incidents.length} en total`} />
                 <MiniKpi title="Cumplimiento" value={`${complianceScore}%`} note={complianceLabel} />
               </div>
@@ -3690,22 +3758,61 @@ function App() {
             <Section title="Inventario de herramientas de IA" subtitle="Registra todas las herramientas de IA que usa tu organización, incluidas las no autorizadas.">
               <InfoBlock
                 icon="◈"
-                what="Un registro de las herramientas de IA generativa que usa tu organización, desde plataformas públicas hasta GPTs internos."
+                what="Un registro de las herramientas de IA generativa que usa tu organización, desde asistentes y modelos fundacionales hasta herramientas especializadas de voz, imagen, video y desarrollo."
                 why="El primer riesgo real suele ser el shadow AI: herramientas usadas sin autorización, sin revisión de datos y sin responsables claros. Visibilizarlas es el primer paso para controlarlas."
                 how="Selecciona todas las herramientas que tu equipo usa actualmente, aunque sean de uso personal o no estén aprobadas oficialmente. Sé honesto — esto es para ti. Al terminar, haz clic en 'Continuar a casos de uso'."
               />
               <Card>
                 <div className="p-6">
                   <p className="mb-4 text-sm text-[#555555]">Selecciona todas las herramientas que usa tu organización (incluyendo las no autorizadas formalmente):</p>
+                  {toolGroups.map((group) => {
+                    const groupItems = [...group.items, ...customTools.filter((t) => t.cat === group.key).map((t) => t.name)];
+                    return (
+                      <div key={group.key} className="mb-5">
+                        <p className="mb-2 text-xs font-bold uppercase tracking-widest text-[#757575]">{group.key}</p>
+                        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+                          {groupItems.map((tool) => {
+                            const isCustom = customTools.some((t) => t.name === tool);
+                            return (
+                              <div key={tool} className="relative">
+                                <button onClick={() => toggleTool(tool)} aria-pressed={org.tools.includes(tool)}
+                                  className={cn("w-full rounded-2xl border p-4 text-left text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#b00020]/30",
+                                    org.tools.includes(tool) ? "border-[#b00020] bg-[#fff5f6] text-[#b00020]" : "border-[#e5e5e5] bg-white text-[#333333] hover:bg-[#fff5f6]")}>
+                                  <span className="mb-2 block text-lg">{org.tools.includes(tool) ? "✓" : "○"}</span>
+                                  {tool}
+                                  {isCustom && <span className="ml-1.5 rounded-full border border-[#e5e5e5] bg-white px-1.5 py-0.5 text-[9px] font-bold uppercase text-[#757575]">Propia</span>}
+                                </button>
+                                {isCustom && (
+                                  <button onClick={() => removeCustomTool(tool)} aria-label={`Eliminar ${tool} del inventario`} title="Eliminar herramienta propia"
+                                    className="absolute right-2 top-2 rounded-full border border-[#e5e5e5] bg-white px-1.5 text-xs text-[#757575] hover:bg-[#fff5f6] hover:text-[#b00020]">×</button>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
                   <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-                    {tools.map((tool) => (
-                      <button key={tool} onClick={() => toggleTool(tool)} aria-pressed={org.tools.includes(tool)}
-                        className={cn("rounded-2xl border p-4 text-left text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#b00020]/30",
-                          org.tools.includes(tool) ? "border-[#b00020] bg-[#fff5f6] text-[#b00020]" : "border-[#e5e5e5] bg-white text-[#333333] hover:bg-[#fff5f6]")}>
-                        <span className="mb-2 block text-lg">{org.tools.includes(tool) ? "✓" : "○"}</span>
-                        {tool}
-                      </button>
-                    ))}
+                    <button onClick={() => toggleTool("Otro")} aria-pressed={org.tools.includes("Otro")}
+                      className={cn("rounded-2xl border p-4 text-left text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#b00020]/30",
+                        org.tools.includes("Otro") ? "border-[#b00020] bg-[#fff5f6] text-[#b00020]" : "border-[#e5e5e5] bg-white text-[#333333] hover:bg-[#fff5f6]")}>
+                      <span className="mb-2 block text-lg">{org.tools.includes("Otro") ? "✓" : "○"}</span>
+                      Otro
+                    </button>
+                  </div>
+                  <div className="mt-5 rounded-2xl border border-dashed border-[#e5e5e5] bg-[#fafafa] p-4">
+                    <p className="mb-3 text-sm font-semibold text-[#333333]">¿Usa tu organización una herramienta que no está en la lista? Agrégala — quedará guardada en esta organización.</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <input value={newToolName} onChange={(e) => setNewToolName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addCustomTool()}
+                        placeholder="Nombre de la herramienta" maxLength={40} aria-label="Nombre de la herramienta nueva"
+                        className="min-w-[200px] flex-1 rounded-2xl border border-[#e5e5e5] py-2.5 px-4 text-sm outline-none focus:border-[#b00020]" />
+                      <select value={newToolCat} onChange={(e) => setNewToolCat(e.target.value)} aria-label="Categoría de la herramienta nueva"
+                        className="rounded-2xl border border-[#e5e5e5] bg-white py-2.5 px-3 text-sm outline-none focus:border-[#b00020]">
+                        {toolGroups.map((g) => <option key={g.key}>{g.key}</option>)}
+                      </select>
+                      <AppButton onClick={addCustomTool} disabled={!newToolName.trim()}>+ Agregar herramienta</AppButton>
+                    </div>
                   </div>
                   {org.tools.length > 0 && (
                     <div className="mt-5 rounded-2xl bg-[#fff5f6] p-4 text-sm text-[#333333]">
@@ -4021,26 +4128,26 @@ function App() {
 
           {/* ── GPTs INTERNOS ─────────────────────────────────── */}
           {active === "gpts" && (
-            <Section title="GPTs y asistentes internos" subtitle="Registra todos los GPTs, agentes y asistentes de IA personalizados que usa o ha desarrollado tu organización.">
+            <Section title="Activos de IA personalizados" subtitle="Registra los GPTs, asistentes, artefactos, dashboards, skills, agentes y automatizaciones que usa o ha desarrollado tu organización.">
               <InfoBlock
                 icon="◑"
-                what="Un inventario de los GPTs internos, agentes personalizados y asistentes configurados por o para tu organización en cualquier plataforma."
-                why="Los GPTs internos son el mayor punto ciego de la gobernanza: acceden a datos de la organización y raramente tienen responsable claro ni registro formal."
-                how="Registra cada GPT o asistente: nombre, plataforma, propósito, datos que maneja y nivel de riesgo. Al terminar, genera el Registro oficial de GPTs internos."
+                what="Un inventario de los activos de IA creados por o para tu organización: GPTs personalizados, proyectos y asistentes, artefactos y apps generadas, dashboards interactivos, skills, agentes autónomos y automatizaciones."
+                why="Los activos personalizados son el mayor punto ciego de la gobernanza: acceden a datos de la organización y raramente tienen responsable claro, estado conocido ni registro formal."
+                how="Registra cada activo con su tipo, responsable, plataforma, propósito, datos que maneja y nivel de riesgo. Al terminar, genera el Registro oficial de activos de IA."
               />
               <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
                 <Card>
                   <div className="grid gap-4 p-6">
-                    <h2 className="text-lg font-bold text-[#222222]">Registrar nuevo GPT / asistente</h2>
+                    <h2 className="text-lg font-bold text-[#222222]">Registrar nuevo activo de IA</h2>
 
-                    {/* ── Biblioteca de GPTs ── */}
+                    {/* ── Biblioteca de activos ── */}
                     <div>
                       <button
                         type="button"
                         onClick={() => { setShowGptLibrary(!showGptLibrary); setGptLibrarySearch(""); }}
                         className="flex w-full items-center justify-between rounded-2xl border border-dashed border-[#cc0000] bg-red-50 px-4 py-2.5 text-sm font-medium text-[#cc0000] transition hover:bg-red-100"
                       >
-                        <span>📚 Elegir de la biblioteca de GPTs ({GPT_LIBRARY.length} disponibles)</span>
+                        <span>📚 Elegir de la biblioteca de activos ({GPT_LIBRARY.length} disponibles)</span>
                         <span className="text-xs">{showGptLibrary ? "▲ Cerrar" : "▼ Abrir"}</span>
                       </button>
                       {showGptLibrary && (
@@ -4069,14 +4176,14 @@ function App() {
                                       key={i}
                                       type="button"
                                       onClick={() => {
-                                        setNewGpt({ name: g.name, platform: g.platform, purpose: g.purpose, area: g.area, access: g.access, dataLevel: g.dataLevel, riskLevel: g.riskLevel });
+                                        setNewGpt({ name: g.name, kind: g.kind || "GPT personalizado", platform: g.platform, purpose: g.purpose, area: g.area, access: g.access, dataLevel: g.dataLevel, riskLevel: g.riskLevel, owner: "", status: "Activo" });
                                         setShowGptLibrary(false);
                                         setGptLibrarySearch("");
                                       }}
                                       className="mb-1 flex w-full flex-col rounded-xl border border-transparent px-3 py-2 text-left transition hover:border-[#cc0000] hover:bg-red-50"
                                     >
                                       <span className="text-sm font-medium text-[#222222]">{g.name}</span>
-                                      <span className="text-xs text-[#888888]">{g.area} · {g.platform} · Riesgo: {g.riskLevel}</span>
+                                      <span className="text-xs text-[#888888]">{g.kind || "GPT personalizado"} · {g.area} · {g.platform} · Riesgo: {g.riskLevel}</span>
                                     </button>
                                   ))}
                                 </div>
@@ -4087,16 +4194,29 @@ function App() {
                       )}
                     </div>
 
-                    <Field label="Nombre del GPT o asistente">
+                    <Field label="Nombre del activo">
                       <TextInput value={newGpt.name} onChange={(e) => setNewGpt({ ...newGpt, name: e.target.value })} placeholder="Ej. Asistente de atención al cliente" maxLength={120} />
+                    </Field>
+                    <Field label="Tipo de activo" help="Los agentes autónomos y las automatizaciones sugieren riesgo Alto por defecto — operan con menos supervisión humana.">
+                      <SelectInput value={newGpt.kind} onChange={(e) => { const k = e.target.value; setNewGpt({ ...newGpt, kind: k, riskLevel: assetTypeRisk[k] || newGpt.riskLevel }); }}>
+                        {assetTypes.map((t) => <option key={t}>{t}</option>)}
+                      </SelectInput>
                     </Field>
                     <Field label="Plataforma base">
                       <SelectInput value={newGpt.platform} onChange={(e) => setNewGpt({ ...newGpt, platform: e.target.value })}>
-                        {["ChatGPT", "Claude", "Gemini", "Copilot", "Otro"].map((p) => <option key={p}>{p}</option>)}
+                        {assetPlatforms.map((p) => <option key={p}>{p}</option>)}
                       </SelectInput>
                     </Field>
-                    <Field label="Propósito principal" help="¿Para qué se usa este GPT?">
+                    <Field label="Propósito principal" help="¿Para qué se usa este activo?">
                       <TextInput value={newGpt.purpose} onChange={(e) => setNewGpt({ ...newGpt, purpose: e.target.value })} placeholder="Ej. Responder preguntas frecuentes de clientes" maxLength={200} />
+                    </Field>
+                    <Field label="Responsable del activo" help="La persona que responde por su uso, mantenimiento y retiro. Un activo sin responsable es shadow AI.">
+                      <TextInput value={newGpt.owner} onChange={(e) => setNewGpt({ ...newGpt, owner: e.target.value })} placeholder="Ej. María Pérez — Gerente de Marketing" maxLength={120} />
+                    </Field>
+                    <Field label="Estado">
+                      <SelectInput value={newGpt.status} onChange={(e) => setNewGpt({ ...newGpt, status: e.target.value })}>
+                        {assetStatuses.map((s) => <option key={s}>{s}</option>)}
+                      </SelectInput>
                     </Field>
                     <Field label="Área usuaria">
                       <SelectInput value={newGpt.area} onChange={(e) => setNewGpt({ ...newGpt, area: e.target.value })}>
@@ -4118,29 +4238,33 @@ function App() {
                         {["Bajo", "Medio", "Alto", "Crítico"].map((r) => <option key={r}>{r}</option>)}
                       </SelectInput>
                     </Field>
-                    <AppButton onClick={addGpt} disabled={!newGpt.name.trim()}>+ Registrar GPT</AppButton>
+                    <AppButton onClick={addGpt} disabled={!newGpt.name.trim()}>+ Registrar activo</AppButton>
                   </div>
                 </Card>
                 <Card>
                   <div className="p-6">
-                    <h2 className="mb-4 text-xl font-bold text-[#222222]">GPTs registrados ({gpts.length})</h2>
+                    <h2 className="mb-4 text-xl font-bold text-[#222222]">Activos registrados ({gpts.length})</h2>
                     {gpts.length === 0 ? (
                       <div className="rounded-2xl border border-[#e5e5e5] p-8 text-center text-sm text-[#757575]">
-                        Ningún GPT registrado. Usa el formulario para agregar el primero.
+                        Ningún activo registrado. Usa el formulario o la biblioteca para agregar el primero.
                       </div>
                     ) : (
                       <div className="space-y-3">
                         {gpts.map((g) => (
-                          <div key={g.id} className="rounded-2xl border border-[#e5e5e5] p-4">
+                          <div key={g.id} className={cn("rounded-2xl border border-[#e5e5e5] p-4", g.status === "Retirado" && "opacity-60")}>
                             <div className="flex items-start justify-between gap-3">
                               <div>
-                                <p className="font-semibold text-[#222222]">{g.name}</p>
-                                <p className="text-xs text-[#757575]">{g.platform} · {g.area} · Datos: {g.dataLevel}</p>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <p className="font-semibold text-[#222222]">{g.name}</p>
+                                  <Badge className="border-[#e5e5e5] bg-[#fafafa] text-[#555555]">{g.kind || "GPT personalizado"}</Badge>
+                                  {g.status && g.status !== "Activo" && <Badge className={g.status === "Retirado" ? "border-gray-300 bg-gray-100 text-gray-600" : "border-sky-200 bg-sky-50 text-sky-700"}>{g.status}</Badge>}
+                                </div>
+                                <p className="mt-1 text-xs text-[#757575]">{g.platform} · {g.area} · Datos: {g.dataLevel}</p>
                                 {g.purpose && <p className="mt-1 text-sm text-[#555555]">{g.purpose}</p>}
                               </div>
                               <Badge className={riskRules[g.riskLevel]?.badge || "border-gray-200 bg-gray-50 text-gray-700"}>{g.riskLevel}</Badge>
                             </div>
-                            <p className="mt-2 text-xs text-[#757575]">Acceso: {g.access}</p>
+                            <p className="mt-2 text-xs text-[#757575]">Acceso: {g.access}{g.owner ? ` · Responsable: ${g.owner}` : " · Sin responsable asignado ⚠"}</p>
                           </div>
                         ))}
                       </div>
@@ -4150,10 +4274,10 @@ function App() {
               </div>
               <div className="mt-5 flex items-center justify-between rounded-[24px] border border-[#e5e5e5] bg-[#fafafa] p-5">
                 <div>
-                  <p className="font-semibold text-[#222222]">¿Registraste todos los GPTs internos?</p>
-                  <p className="text-sm text-[#555555]">Genera el registro oficial para documentar y controlar el uso de asistentes personalizados.</p>
+                  <p className="font-semibold text-[#222222]">¿Registraste todos los activos de IA?</p>
+                  <p className="text-sm text-[#555555]">Genera el registro oficial para documentar y controlar los activos personalizados de la organización.</p>
                 </div>
-                <AppButton onClick={() => openDocViewer("Registro de GPTs internos")}>Generar registro →</AppButton>
+                <AppButton onClick={() => openDocViewer("Registro de activos de IA personalizados")}>Generar registro →</AppButton>
               </div>
             </Section>
           )}
