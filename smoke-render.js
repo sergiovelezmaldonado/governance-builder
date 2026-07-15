@@ -33,8 +33,27 @@ const sandbox = {
   encodeURIComponent, decodeURIComponent, navigator: {},
 };
 vm.createContext(sandbox);
-vm.runInContext(code + '\n;globalThis.__App = App; globalThis.__cmp = { DonutScore, RiskMatrix, DocCategoryBars, ActivityFeed, matrixZone };', sandbox);
+vm.runInContext(code + '\n;globalThis.__App = App; globalThis.__cmp = { DonutScore, RiskMatrix, DocCategoryBars, ActivityFeed, matrixZone, calculateReadinessScore, buildDocument, docTypes, GPT_LIBRARY };', sandbox);
 const out = ReactDOMServer.renderToString(React.createElement(sandbox.__App));
+
+// Fix de puntaje: organización en blanco = 0; "No existe política formal" no suma bonus
+const { calculateReadinessScore: calc, buildDocument: bd, docTypes: dts, GPT_LIBRARY: lib } = sandbox.__cmp;
+const blankOrg = { name: '', type: 'Pyme', sensitiveData: 'Sí, ocasionalmente', maturity: 'Exploración inicial', policy: 'No existe política formal', tools: [] };
+const namedOrg = { ...blankOrg, name: 'Prueba SA' };
+const formalOrg = { ...namedOrg, policy: 'Existe política formal' };
+let failedLogic = 0;
+for (const [name, ok] of [
+  ['puntaje org en blanco = 0', calc(blankOrg, []) === 0],
+  ['sin bonus con "No existe política formal"', calc(namedOrg, []) === 30],
+  ['bonus solo con política formal real', calc(formalOrg, []) === 48],
+  ['25 tipos de documento', dts.length === 25],
+  ['registro de activos renombrado', dts.includes('Registro de activos de IA personalizados') && bd('Registro de activos de IA personalizados', namedOrg, []).includes('REGISTRO DE ACTIVOS DE IA PERSONALIZADOS')],
+  ['biblioteca con 120 activos', lib.length === 120],
+  ['biblioteca con tipos nuevos', lib.some((g) => g.kind === 'Agente autónomo') && lib.some((g) => g.kind === 'Automatización / Flujo')],
+]) {
+  console.log((ok ? 'OK   ' : 'FALTA') + ' — lógica: ' + name);
+  if (!ok) failedLogic++;
+}
 
 // Componentes del dashboard con datos de muestra
 const { DonutScore, RiskMatrix, DocCategoryBars, ActivityFeed, matrixZone } = sandbox.__cmp;
@@ -77,4 +96,4 @@ for (const c of checks) {
   if (!ok) failed++;
 }
 console.log('HTML renderizado: ' + Math.round(out.length / 1024) + ' KB');
-process.exit(failed + failedDash ? 1 : 0);
+process.exit(failed + failedDash + failedLogic ? 1 : 0);
