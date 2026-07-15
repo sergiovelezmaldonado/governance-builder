@@ -33,7 +33,7 @@ const sandbox = {
   encodeURIComponent, decodeURIComponent, navigator: {},
 };
 vm.createContext(sandbox);
-vm.runInContext(code + '\n;globalThis.__App = App; globalThis.__cmp = { DonutScore, RiskMatrix, DocCategoryBars, ActivityFeed, matrixZone, calculateReadinessScore, buildDocument, docTypes, GPT_LIBRARY };', sandbox);
+vm.runInContext(code + '\n;globalThis.__App = App; globalThis.__cmp = { DonutScore, RiskMatrix, DocCategoryBars, ActivityFeed, matrixZone, calculateReadinessScore, buildDocument, docTypes, GPT_LIBRARY, CASE_LIBRARY, classifyRisk, areaOptions };', sandbox);
 const out = ReactDOMServer.renderToString(React.createElement(sandbox.__App));
 
 // Fix de puntaje: organización en blanco = 0; "No existe política formal" no suma bonus
@@ -50,6 +50,9 @@ for (const [name, ok] of [
   ['registro de activos renombrado', dts.includes('Registro de activos de IA personalizados') && bd('Registro de activos de IA personalizados', namedOrg, []).includes('REGISTRO DE ACTIVOS DE IA PERSONALIZADOS')],
   ['biblioteca con 120 activos', lib.length === 120],
   ['biblioteca con tipos nuevos', lib.some((g) => g.kind === 'Agente autónomo') && lib.some((g) => g.kind === 'Automatización / Flujo')],
+  ['biblioteca de casos: 150 (10 por área)', sandbox.__cmp.CASE_LIBRARY.length === 150 && sandbox.__cmp.areaOptions.every((a) => sandbox.__cmp.CASE_LIBRARY.filter((c) => c.area === a).length === 10)],
+  ['casos con todos los campos', sandbox.__cmp.CASE_LIBRARY.every((c) => c.name && c.area && c.data && c.automation && c.human && c.prob && c.impact)],
+  ['casos clasificables sin error', sandbox.__cmp.CASE_LIBRARY.every((c) => ['Bajo', 'Medio', 'Alto', 'Crítico'].includes(sandbox.__cmp.classifyRisk(c).level))],
 ]) {
   console.log((ok ? 'OK   ' : 'FALTA') + ' — lógica: ' + name);
   if (!ok) failedLogic++;
