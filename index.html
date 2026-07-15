@@ -20,7 +20,7 @@
     <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone@7.29.7/babel.min.js"></script>
-    <meta name="futuria-version" content="v1.7-2026-07-15" />
+    <meta name="futuria-version" content="v1.8-2026-07-15" />
   </head>
   <body>
     <div id="root"></div>
@@ -234,7 +234,176 @@ const sampleUseCases = [
   { id: 2, name: "Redacción de contenidos de marketing", area: "Marketing y Comunicación", data: "No sensible", automation: "Media", human: "Sí", level: "Medio", score: 40 },
   { id: 3, name: "Atención al cliente con datos personales", area: "Servicio al Cliente / CX", data: "Personal", automation: "Media", human: "Parcial", level: "Alto", score: 75 },
   { id: 4, name: "Preselección de candidatos", area: "Talento humano / RRHH", data: "Personal / laboral", automation: "Alta", human: "Parcial", level: "Crítico", score: 100 },
-  { id: 5, name: "GPT interno con información confidencial", area: "Dirección / Gerencia General", data: "Confidencial", automation: "Media", human: "Sí", level: "Alto", score: 70 },
+  { id: 5, name: "Asistente interno con información confidencial", area: "Dirección / Gerencia General", data: "Confidencial", automation: "Media", human: "Sí", level: "Alto", score: 70 },
+];
+
+// Biblioteca de casos de uso preestablecidos — 10 por área. Cada uno trae todos los campos calibrados.
+const CASE_LIBRARY = [
+  // ── Dirección / Gerencia General ──
+  { area: "Dirección / Gerencia General", name: "Resumen de informes de gestión para comité", data: "Confidencial", automation: "Media", human: "Sí", prob: "Media", impact: "Alto" },
+  { area: "Dirección / Gerencia General", name: "Análisis de escenarios estratégicos", data: "Confidencial", automation: "Media", human: "Sí", prob: "Media", impact: "Alto" },
+  { area: "Dirección / Gerencia General", name: "Borrador de comunicados internos", data: "No sensible", automation: "Baja", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Dirección / Gerencia General", name: "Preparación de presentaciones de directorio", data: "Confidencial", automation: "Baja", human: "Sí", prob: "Baja", impact: "Medio" },
+  { area: "Dirección / Gerencia General", name: "Síntesis de investigación de mercado pública", data: "Pública", automation: "Baja", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Dirección / Gerencia General", name: "Análisis de riesgos corporativos", data: "Confidencial", automation: "Media", human: "Parcial", prob: "Media", impact: "Alto" },
+  { area: "Dirección / Gerencia General", name: "Redacción de actas de reuniones ejecutivas", data: "Confidencial", automation: "Media", human: "Sí", prob: "Media", impact: "Medio" },
+  { area: "Dirección / Gerencia General", name: "Priorización de iniciativas con datos financieros", data: "Confidencial", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Crítico" },
+  { area: "Dirección / Gerencia General", name: "Monitoreo de reputación corporativa", data: "Pública", automation: "Media", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Dirección / Gerencia General", name: "Generación de tableros de KPIs para dirección", data: "Confidencial", automation: "Media", human: "Sí", prob: "Media", impact: "Medio" },
+  // ── Marketing y Comunicación ──
+  { area: "Marketing y Comunicación", name: "Redacción de contenidos para redes sociales", data: "No sensible", automation: "Media", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Marketing y Comunicación", name: "Generación de imágenes para campañas", data: "No sensible", automation: "Media", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Marketing y Comunicación", name: "Análisis de sentimiento de comentarios", data: "Personal", automation: "Media", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Marketing y Comunicación", name: "Personalización de emails masivos", data: "Personal", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Alto" },
+  { area: "Marketing y Comunicación", name: "Traducción de materiales de marketing", data: "No sensible", automation: "Media", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Marketing y Comunicación", name: "Ideación de campañas publicitarias", data: "Pública", automation: "Baja", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Marketing y Comunicación", name: "Redacción de notas de prensa", data: "No sensible", automation: "Baja", human: "Sí", prob: "Baja", impact: "Medio" },
+  { area: "Marketing y Comunicación", name: "Segmentación de audiencias con datos de clientes", data: "Personal", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Alto" },
+  { area: "Marketing y Comunicación", name: "Guiones para video y podcast", data: "Pública", automation: "Media", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Marketing y Comunicación", name: "Respuesta automatizada a comentarios en redes", data: "Personal", automation: "Alta", human: "No", prob: "Alta", impact: "Alto" },
+  // ── Ventas y Comercial ──
+  { area: "Ventas y Comercial", name: "Generación de propuestas comerciales", data: "No sensible", automation: "Media", human: "Sí", prob: "Baja", impact: "Medio" },
+  { area: "Ventas y Comercial", name: "Redacción de correos de prospección", data: "Personal", automation: "Media", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Ventas y Comercial", name: "Calificación automática de leads", data: "Personal", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Alto" },
+  { area: "Ventas y Comercial", name: "Resumen de llamadas de ventas", data: "Personal", automation: "Media", human: "Sí", prob: "Media", impact: "Medio" },
+  { area: "Ventas y Comercial", name: "Análisis de pipeline y forecast", data: "Confidencial", automation: "Media", human: "Sí", prob: "Media", impact: "Alto" },
+  { area: "Ventas y Comercial", name: "Personalización de pitch por cliente", data: "Personal", automation: "Media", human: "Sí", prob: "Media", impact: "Medio" },
+  { area: "Ventas y Comercial", name: "Respuestas a licitaciones (RFP)", data: "Confidencial", automation: "Media", human: "Parcial", prob: "Media", impact: "Alto" },
+  { area: "Ventas y Comercial", name: "Recomendación de precios por cliente", data: "Confidencial", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Crítico" },
+  { area: "Ventas y Comercial", name: "Chatbot de calificación en el sitio web", data: "Personal", automation: "Alta", human: "No", prob: "Alta", impact: "Alto" },
+  { area: "Ventas y Comercial", name: "Análisis de competencia pública", data: "Pública", automation: "Baja", human: "Sí", prob: "Baja", impact: "Bajo" },
+  // ── Legal y Compliance ──
+  { area: "Legal y Compliance", name: "Revisión de cláusulas contractuales", data: "Confidencial", automation: "Media", human: "Sí", prob: "Media", impact: "Alto" },
+  { area: "Legal y Compliance", name: "Resumen de sentencias y jurisprudencia", data: "Pública", automation: "Media", human: "Sí", prob: "Baja", impact: "Medio" },
+  { area: "Legal y Compliance", name: "Redacción de contratos estándar", data: "Confidencial", automation: "Media", human: "Parcial", prob: "Media", impact: "Alto" },
+  { area: "Legal y Compliance", name: "Análisis de cumplimiento normativo", data: "Confidencial", automation: "Media", human: "Sí", prob: "Media", impact: "Alto" },
+  { area: "Legal y Compliance", name: "Detección de riesgos en contratos", data: "Confidencial", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Crítico" },
+  { area: "Legal y Compliance", name: "Clasificación de documentos legales", data: "Confidencial", automation: "Media", human: "Parcial", prob: "Media", impact: "Alto" },
+  { area: "Legal y Compliance", name: "Respuesta a consultas legales internas", data: "Confidencial", automation: "Media", human: "Parcial", prob: "Media", impact: "Alto" },
+  { area: "Legal y Compliance", name: "Due diligence documental", data: "Confidencial", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Crítico" },
+  { area: "Legal y Compliance", name: "Redacción de políticas internas", data: "No sensible", automation: "Baja", human: "Sí", prob: "Baja", impact: "Medio" },
+  { area: "Legal y Compliance", name: "Revisión de contratos con decisión automática", data: "Confidencial", automation: "Alta", human: "No", prob: "Alta", impact: "Crítico" },
+  // ── Talento humano / RRHH ──
+  { area: "Talento humano / RRHH", name: "Preselección de candidatos (screening de CV)", data: "Personal / laboral", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Crítico" },
+  { area: "Talento humano / RRHH", name: "Redacción de ofertas de empleo", data: "No sensible", automation: "Baja", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Talento humano / RRHH", name: "Resumen de entrevistas", data: "Personal / laboral", automation: "Media", human: "Sí", prob: "Media", impact: "Alto" },
+  { area: "Talento humano / RRHH", name: "Análisis de clima laboral", data: "Personal / laboral", automation: "Media", human: "Parcial", prob: "Media", impact: "Alto" },
+  { area: "Talento humano / RRHH", name: "Evaluación de desempeño asistida", data: "Personal / laboral", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Crítico" },
+  { area: "Talento humano / RRHH", name: "Respuestas a consultas de empleados (bot de RRHH)", data: "Personal", automation: "Media", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Talento humano / RRHH", name: "Planes de desarrollo y capacitación", data: "Personal / laboral", automation: "Baja", human: "Sí", prob: "Baja", impact: "Medio" },
+  { area: "Talento humano / RRHH", name: "Predicción de rotación de personal", data: "Personal / laboral", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Crítico" },
+  { area: "Talento humano / RRHH", name: "Redacción de comunicaciones internas", data: "No sensible", automation: "Baja", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Talento humano / RRHH", name: "Análisis de encuestas de satisfacción", data: "Personal", automation: "Media", human: "Sí", prob: "Media", impact: "Medio" },
+  // ── Finanzas y Contabilidad ──
+  { area: "Finanzas y Contabilidad", name: "Conciliación de reportes financieros", data: "Confidencial", automation: "Media", human: "Parcial", prob: "Media", impact: "Alto" },
+  { area: "Finanzas y Contabilidad", name: "Análisis de estados financieros", data: "Confidencial", automation: "Media", human: "Sí", prob: "Media", impact: "Alto" },
+  { area: "Finanzas y Contabilidad", name: "Detección de anomalías en transacciones", data: "Confidencial", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Crítico" },
+  { area: "Finanzas y Contabilidad", name: "Elaboración de presupuestos", data: "Confidencial", automation: "Media", human: "Sí", prob: "Media", impact: "Alto" },
+  { area: "Finanzas y Contabilidad", name: "Clasificación de gastos", data: "Confidencial", automation: "Alta", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Finanzas y Contabilidad", name: "Proyecciones de flujo de caja", data: "Confidencial", automation: "Media", human: "Sí", prob: "Media", impact: "Alto" },
+  { area: "Finanzas y Contabilidad", name: "Redacción de informes para inversores", data: "Confidencial", automation: "Media", human: "Sí", prob: "Media", impact: "Alto" },
+  { area: "Finanzas y Contabilidad", name: "Evaluación de riesgo crediticio", data: "Personal", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Crítico" },
+  { area: "Finanzas y Contabilidad", name: "Resumen de facturas y órdenes de compra", data: "No sensible", automation: "Media", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Finanzas y Contabilidad", name: "Aprobación automática de pagos menores", data: "Confidencial", automation: "Alta", human: "No", prob: "Alta", impact: "Crítico" },
+  // ── Tecnología / IT ──
+  { area: "Tecnología / IT", name: "Generación y revisión de código", data: "No sensible", automation: "Media", human: "Sí", prob: "Media", impact: "Medio" },
+  { area: "Tecnología / IT", name: "Documentación técnica automatizada", data: "No sensible", automation: "Media", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Tecnología / IT", name: "Análisis de logs y detección de incidentes", data: "Confidencial", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Alto" },
+  { area: "Tecnología / IT", name: "Soporte técnico de primer nivel (bot)", data: "Personal", automation: "Alta", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Tecnología / IT", name: "Pruebas de seguridad asistidas", data: "Confidencial", automation: "Media", human: "Parcial", prob: "Media", impact: "Alto" },
+  { area: "Tecnología / IT", name: "Respuesta automática a alertas de seguridad", data: "Confidencial", automation: "Alta", human: "No", prob: "Alta", impact: "Crítico" },
+  { area: "Tecnología / IT", name: "Generación de consultas a bases de datos", data: "Confidencial", automation: "Media", human: "Parcial", prob: "Media", impact: "Alto" },
+  { area: "Tecnología / IT", name: "Priorización de tickets de soporte", data: "Personal", automation: "Alta", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Tecnología / IT", name: "Redacción de manuales de usuario", data: "Pública", automation: "Baja", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Tecnología / IT", name: "Análisis de vulnerabilidades", data: "Confidencial", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Crítico" },
+  // ── Operaciones ──
+  { area: "Operaciones", name: "Optimización de procesos operativos", data: "No sensible", automation: "Media", human: "Sí", prob: "Media", impact: "Medio" },
+  { area: "Operaciones", name: "Predicción de demanda", data: "Confidencial", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Alto" },
+  { area: "Operaciones", name: "Redacción de procedimientos (SOP)", data: "No sensible", automation: "Baja", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Operaciones", name: "Control de calidad asistido por IA", data: "No sensible", automation: "Alta", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Operaciones", name: "Análisis de eficiencia de planta", data: "Confidencial", automation: "Media", human: "Sí", prob: "Media", impact: "Medio" },
+  { area: "Operaciones", name: "Programación de mantenimiento predictivo", data: "Confidencial", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Alto" },
+  { area: "Operaciones", name: "Gestión de inventario automatizada", data: "Confidencial", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Alto" },
+  { area: "Operaciones", name: "Detección de cuellos de botella", data: "No sensible", automation: "Media", human: "Sí", prob: "Media", impact: "Medio" },
+  { area: "Operaciones", name: "Asignación automática de tareas", data: "Personal / laboral", automation: "Alta", human: "No", prob: "Alta", impact: "Alto" },
+  { area: "Operaciones", name: "Reportes operativos diarios", data: "No sensible", automation: "Media", human: "Sí", prob: "Baja", impact: "Bajo" },
+  // ── Servicio al Cliente / CX ──
+  { area: "Servicio al Cliente / CX", name: "Chatbot de atención al cliente", data: "Personal", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Alto" },
+  { area: "Servicio al Cliente / CX", name: "Clasificación y enrutamiento de tickets", data: "Personal", automation: "Alta", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Servicio al Cliente / CX", name: "Respuestas sugeridas a agentes", data: "Personal", automation: "Media", human: "Sí", prob: "Media", impact: "Medio" },
+  { area: "Servicio al Cliente / CX", name: "Análisis de satisfacción (NPS)", data: "Personal", automation: "Media", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Servicio al Cliente / CX", name: "Resumen de interacciones con clientes", data: "Personal", automation: "Media", human: "Sí", prob: "Media", impact: "Medio" },
+  { area: "Servicio al Cliente / CX", name: "Detección de clientes en riesgo de fuga", data: "Personal", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Alto" },
+  { area: "Servicio al Cliente / CX", name: "Traducción en tiempo real de soporte", data: "Personal", automation: "Alta", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Servicio al Cliente / CX", name: "Respuesta automática a reclamos", data: "Personal", automation: "Alta", human: "No", prob: "Alta", impact: "Alto" },
+  { area: "Servicio al Cliente / CX", name: "Base de conocimiento autogenerada", data: "No sensible", automation: "Media", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Servicio al Cliente / CX", name: "Priorización de casos por urgencia", data: "Personal", automation: "Alta", human: "Parcial", prob: "Media", impact: "Medio" },
+  // ── Investigación y Desarrollo ──
+  { area: "Investigación y Desarrollo", name: "Revisión de literatura científica", data: "Pública", automation: "Media", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Investigación y Desarrollo", name: "Generación de hipótesis de producto", data: "No sensible", automation: "Baja", human: "Sí", prob: "Baja", impact: "Medio" },
+  { area: "Investigación y Desarrollo", name: "Análisis de patentes", data: "Pública", automation: "Media", human: "Sí", prob: "Baja", impact: "Medio" },
+  { area: "Investigación y Desarrollo", name: "Diseño asistido de experimentos", data: "Confidencial", automation: "Media", human: "Parcial", prob: "Media", impact: "Alto" },
+  { area: "Investigación y Desarrollo", name: "Síntesis de datos de investigación", data: "Confidencial", automation: "Media", human: "Sí", prob: "Media", impact: "Alto" },
+  { area: "Investigación y Desarrollo", name: "Prototipado rápido de conceptos", data: "No sensible", automation: "Media", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Investigación y Desarrollo", name: "Análisis de tendencias tecnológicas", data: "Pública", automation: "Media", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Investigación y Desarrollo", name: "Modelado predictivo de resultados", data: "Confidencial", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Alto" },
+  { area: "Investigación y Desarrollo", name: "Redacción de papers y reportes", data: "No sensible", automation: "Baja", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Investigación y Desarrollo", name: "Benchmarking competitivo", data: "Pública", automation: "Media", human: "Sí", prob: "Baja", impact: "Medio" },
+  // ── Educación / Formación ──
+  { area: "Educación / Formación", name: "Diseño de planes de estudio", data: "No sensible", automation: "Baja", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Educación / Formación", name: "Generación de material didáctico", data: "No sensible", automation: "Media", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Educación / Formación", name: "Corrección automática de evaluaciones", data: "Personal", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Alto" },
+  { area: "Educación / Formación", name: "Tutoría personalizada (chatbot educativo)", data: "Personal", automation: "Alta", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Educación / Formación", name: "Creación de cuestionarios y exámenes", data: "No sensible", automation: "Media", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Educación / Formación", name: "Análisis de desempeño estudiantil", data: "Personal", automation: "Media", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Educación / Formación", name: "Detección de plagio", data: "Personal", automation: "Alta", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Educación / Formación", name: "Retroalimentación automática a estudiantes", data: "Personal", automation: "Alta", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Educación / Formación", name: "Traducción de contenidos formativos", data: "No sensible", automation: "Media", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Educación / Formación", name: "Recomendación de rutas de aprendizaje", data: "Personal", automation: "Alta", human: "Parcial", prob: "Media", impact: "Medio" },
+  // ── Salud y Bienestar ──
+  { area: "Salud y Bienestar", name: "Resumen de historias clínicas", data: "Personal", automation: "Media", human: "Parcial", prob: "Media", impact: "Crítico" },
+  { area: "Salud y Bienestar", name: "Triage de pacientes asistido", data: "Personal", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Crítico" },
+  { area: "Salud y Bienestar", name: "Apoyo a diagnóstico por imágenes", data: "Personal", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Crítico" },
+  { area: "Salud y Bienestar", name: "Recordatorios de medicación (bot)", data: "Personal", automation: "Alta", human: "Parcial", prob: "Media", impact: "Alto" },
+  { area: "Salud y Bienestar", name: "Análisis de datos de bienestar", data: "Personal", automation: "Media", human: "Parcial", prob: "Media", impact: "Alto" },
+  { area: "Salud y Bienestar", name: "Redacción de notas clínicas", data: "Personal", automation: "Media", human: "Sí", prob: "Media", impact: "Alto" },
+  { area: "Salud y Bienestar", name: "Programación de citas médicas", data: "Personal", automation: "Alta", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Salud y Bienestar", name: "Educación al paciente (información general)", data: "Pública", automation: "Media", human: "Sí", prob: "Baja", impact: "Medio" },
+  { area: "Salud y Bienestar", name: "Detección de riesgo en signos vitales", data: "Personal", automation: "Alta", human: "No", prob: "Alta", impact: "Crítico" },
+  { area: "Salud y Bienestar", name: "Análisis epidemiológico de datos agregados", data: "No sensible", automation: "Media", human: "Sí", prob: "Baja", impact: "Medio" },
+  // ── Logística ──
+  { area: "Logística", name: "Optimización de rutas de entrega", data: "Confidencial", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Alto" },
+  { area: "Logística", name: "Predicción de tiempos de entrega", data: "No sensible", automation: "Alta", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Logística", name: "Gestión automática de inventario", data: "Confidencial", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Alto" },
+  { area: "Logística", name: "Planificación de carga", data: "No sensible", automation: "Media", human: "Sí", prob: "Media", impact: "Medio" },
+  { area: "Logística", name: "Seguimiento de envíos (tracking)", data: "Personal", automation: "Media", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Logística", name: "Predicción de quiebres de stock", data: "Confidencial", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Alto" },
+  { area: "Logística", name: "Selección automática de transportistas", data: "Confidencial", automation: "Alta", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Logística", name: "Análisis de costos logísticos", data: "Confidencial", automation: "Media", human: "Sí", prob: "Media", impact: "Medio" },
+  { area: "Logística", name: "Detección de anomalías en la cadena de suministro", data: "Confidencial", automation: "Alta", human: "Parcial", prob: "Alta", impact: "Alto" },
+  { area: "Logística", name: "Reportes de desempeño de proveedores", data: "No sensible", automation: "Media", human: "Sí", prob: "Baja", impact: "Bajo" },
+  // ── Administración ──
+  { area: "Administración", name: "Clasificación y archivo de documentos", data: "No sensible", automation: "Media", human: "Parcial", prob: "Baja", impact: "Bajo" },
+  { area: "Administración", name: "Redacción de correspondencia", data: "No sensible", automation: "Baja", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Administración", name: "Gestión de agenda y reuniones", data: "Personal", automation: "Media", human: "Parcial", prob: "Baja", impact: "Bajo" },
+  { area: "Administración", name: "Procesamiento de facturas", data: "Confidencial", automation: "Alta", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Administración", name: "Transcripción de reuniones", data: "Confidencial", automation: "Media", human: "Sí", prob: "Media", impact: "Medio" },
+  { area: "Administración", name: "Resumen de correos entrantes", data: "Personal", automation: "Media", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Administración", name: "Generación de reportes administrativos", data: "No sensible", automation: "Media", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Administración", name: "Control de gastos de viaje", data: "Personal", automation: "Media", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Administración", name: "Actualización de bases de datos", data: "Personal", automation: "Alta", human: "No", prob: "Alta", impact: "Alto" },
+  { area: "Administración", name: "Respuesta a solicitudes internas (bot)", data: "No sensible", automation: "Alta", human: "Parcial", prob: "Media", impact: "Bajo" },
+  // ── Otro ──
+  { area: "Otro", name: "Traducción de documentos generales", data: "No sensible", automation: "Media", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Otro", name: "Corrección de estilo y ortografía", data: "No sensible", automation: "Baja", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Otro", name: "Lluvia de ideas y brainstorming", data: "Pública", automation: "Baja", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Otro", name: "Resumen de reuniones", data: "No sensible", automation: "Media", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Otro", name: "Búsqueda y síntesis de información pública", data: "Pública", automation: "Media", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Otro", name: "Redacción de textos generales", data: "No sensible", automation: "Baja", human: "Sí", prob: "Baja", impact: "Bajo" },
+  { area: "Otro", name: "Análisis de documentos internos", data: "Confidencial", automation: "Media", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Otro", name: "Automatización de tareas repetitivas", data: "No sensible", automation: "Alta", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Otro", name: "Clasificación de información", data: "Personal", automation: "Media", human: "Parcial", prob: "Media", impact: "Medio" },
+  { area: "Otro", name: "Asistente general de productividad", data: "Personal", automation: "Media", human: "Parcial", prob: "Baja", impact: "Bajo" },
 ];
 
 const riskRules = {
@@ -2932,6 +3101,8 @@ function App() {
   const [useCases, setUseCases] = useState(stored?.useCases || []);
   const [newCase, setNewCase] = useState({ name: "", area: areaOptions[0], data: "Pública", automation: "Baja", human: "Sí", prob: "Media", impact: "Medio" });
   const [editingCaseId, setEditingCaseId] = useState(null);
+  const [showCaseLibrary, setShowCaseLibrary] = useState(false);
+  const [caseLibrarySearch, setCaseLibrarySearch] = useState("");
 
   const [gpts, setGpts] = useState(stored?.gpts || []);
   const [roles, setRoles] = useState(stored?.roles || defaultRoles);
@@ -2978,6 +3149,12 @@ function App() {
       (g.kind || "GPT personalizado").toLowerCase().includes(q)
     );
   }, [gptLibrarySearch]);
+
+  const filteredCaseLibrary = useMemo(() => {
+    const q = caseLibrarySearch.toLowerCase().trim();
+    if (!q) return CASE_LIBRARY;
+    return CASE_LIBRARY.filter((c) => c.name.toLowerCase().includes(q) || c.area.toLowerCase().includes(q));
+  }, [caseLibrarySearch]);
 
   const readinessLabel = score === 0 ? "Sin evaluar" : score >= 75 ? "Sólida" : score >= 50 ? "En construcción" : score >= 30 ? "Frágil" : "Crítica";
   const highRiskCount = useCases.filter((c) => ["Alto", "Crítico"].includes(c.level)).length;
@@ -3839,7 +4016,7 @@ function App() {
                 icon="◆"
                 what="Un registro estructurado de cada forma en que tu organización usa inteligencia artificial, con su clasificación de riesgo automática."
                 why="Sin este registro, la política se vuelve decorativa. Cada caso de uso debe tener dueño, datos usados, nivel de automatización y revisión humana documentados."
-                how="Completa el formulario de la izquierda para cada uso de IA en tu organización: desde resumir documentos hasta atender clientes. El sistema clasificará automáticamente el nivel de riesgo. Puedes buscar y revisar los casos en la tabla de la derecha."
+                how="¿No sabes por dónde empezar? Abre la biblioteca de casos y elige ejemplos por área — se llena el formulario con valores sugeridos que ajustas a tu realidad. O completa el formulario a mano para cada uso de IA. El sistema clasificará automáticamente el nivel de riesgo. Puedes buscar y revisar los casos en la tabla de la derecha."
               />
 
               {/* Barra de acciones globales */}
@@ -3864,6 +4041,55 @@ function App() {
                     ) : (
                       <h2 className="text-lg font-bold text-[#222222]">Agregar nuevo caso de uso</h2>
                     )}
+
+                    {/* ── Biblioteca de casos de uso ── */}
+                    {!editingCaseId && (
+                      <div>
+                        <button type="button" onClick={() => { setShowCaseLibrary(!showCaseLibrary); setCaseLibrarySearch(""); }}
+                          className="flex w-full items-center justify-between rounded-2xl border border-dashed border-[#cc0000] bg-red-50 px-4 py-2.5 text-sm font-medium text-[#cc0000] transition hover:bg-red-100">
+                          <span>📚 Elegir de la biblioteca de casos ({CASE_LIBRARY.length} disponibles)</span>
+                          <span className="text-xs">{showCaseLibrary ? "▲ Cerrar" : "▼ Abrir"}</span>
+                        </button>
+                        {showCaseLibrary && (
+                          <div className="mt-2 rounded-2xl border border-[#e5e5e5] bg-white shadow-sm">
+                            <div className="p-3 pb-2">
+                              <input type="text" value={caseLibrarySearch} onChange={(e) => setCaseLibrarySearch(e.target.value)}
+                                placeholder="Buscar por nombre o área..." autoFocus
+                                className="w-full rounded-xl border border-[#e5e5e5] bg-[#fafafa] px-3 py-2 text-sm outline-none focus:border-[#cc0000] focus:ring-1 focus:ring-[#cc0000]" />
+                              <p className="mt-1 text-right text-xs text-[#aaaaaa]">{filteredCaseLibrary.length} resultado{filteredCaseLibrary.length !== 1 ? "s" : ""}</p>
+                            </div>
+                            <div className="max-h-72 overflow-y-auto px-3 pb-3">
+                              {filteredCaseLibrary.length === 0 ? (
+                                <p className="py-6 text-center text-sm text-[#aaaaaa]">Sin resultados. Prueba con otra búsqueda.</p>
+                              ) : (() => {
+                                const cats = [...new Set(filteredCaseLibrary.map((c) => c.area))];
+                                return cats.map((cat) => (
+                                  <div key={cat} className="mb-2">
+                                    <p className="mb-1 mt-2 text-[10px] font-semibold uppercase tracking-wider text-[#aaaaaa]">{cat}</p>
+                                    {filteredCaseLibrary.filter((c) => c.area === cat).map((c, i) => {
+                                      const preview = classifyRisk(c);
+                                      return (
+                                        <button key={i} type="button"
+                                          onClick={() => { setNewCase({ name: c.name, area: c.area, data: c.data, automation: c.automation, human: c.human, prob: c.prob, impact: c.impact }); setShowCaseLibrary(false); setCaseLibrarySearch(""); }}
+                                          className="mb-1 flex w-full items-center justify-between gap-2 rounded-xl border border-transparent px-3 py-2 text-left transition hover:border-[#cc0000] hover:bg-red-50">
+                                          <span className="flex flex-col">
+                                            <span className="text-sm font-medium text-[#222222]">{c.name}</span>
+                                            <span className="text-xs text-[#888888]">Datos: {c.data} · Automatización: {c.automation} · Revisión: {c.human}</span>
+                                          </span>
+                                          <Badge className={cn("shrink-0", riskRules[preview.level]?.badge || "border-gray-200 bg-gray-50 text-gray-700")}>{preview.level}</Badge>
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                ));
+                              })()}
+                            </div>
+                            <div className="border-t border-[#e5e5e5] px-3 py-2 text-xs text-[#757575]">Al elegir un caso se llena el formulario con valores sugeridos. Ajústalos a tu realidad antes de agregar.</div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <Field label="Nombre del caso" help="Describe brevemente qué hace la IA en este caso. Ej: 'Resumen de contratos para revisión interna'.">
                       <TextInput value={newCase.name} onChange={(e) => setNewCase({ ...newCase, name: e.target.value })} placeholder="Ej. Generación de propuestas de ventas" maxLength={120} />
                     </Field>
